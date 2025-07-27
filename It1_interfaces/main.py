@@ -12,15 +12,17 @@ print("📸 Loading board image...")
 img = Img()
 #img.read("C:\\Users\\USER\\Desktop\\chess\\CTD25\\board.png", ...)
 img_path = pathlib.Path(__file__).parent.parent / "board.png"
-img.read(str(img_path), size=(820, 820))
+board_pix_size = 800  # לדוגמה
+cell_size = board_pix_size // 8
+img.read(str(img_path), size=(board_pix_size, board_pix_size))
 print("📸 Image loaded:", img.img is not None)
 if img.img is None:
     raise RuntimeError("Board image failed to load!")
 
 # צור את הלוח עם התמונה
 board = Board(
-    cell_W_pix=105,
-    cell_H_pix=105,
+    cell_W_pix=cell_size,
+    cell_H_pix=cell_size,
     cell_H_m=1,
     cell_W_m=1,
     W_cells=8,

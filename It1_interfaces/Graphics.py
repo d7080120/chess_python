@@ -32,9 +32,10 @@ class Graphics:
 
     def _load_frames(self) -> List[Img]:
         frames = []
+        cell_size = (self.board.cell_W_pix, self.board.cell_H_pix)
         for img_path in sorted(self.sprites_folder.glob("*.png")):
             img = Img()
-            img.read(str(img_path), size=(80, 80))  # ודא שזה תואם לגודל התא שלך
+            img.read(str(img_path), size=cell_size)  # ודא שזה תואם לגודל התא שלך
             frames.append(img)
         return frames if frames else [Img()]  # לפחות פריים ריק
 
