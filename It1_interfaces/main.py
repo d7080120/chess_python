@@ -1,11 +1,12 @@
 from img import Img
 from Board import Board
-from Game import Game
+from GameRefactored import GameRefactored  # השתמש במחלקה המחודשת
 from PieceFactory import PieceFactory
 import pathlib
 import cv2
 
 print("🎮 Starting chess game...")
+print("🔄 Using refactored Game architecture with modular design!")
 
 # טען את התמונה
 print("📸 Loading board image...")
@@ -48,7 +49,7 @@ pieces = []
 piece_counters = {}  # Track count per piece type for unique IDs
 
 # צור את המשחק עם התור
-game = Game([], board)
+game = GameRefactored([], board)  # השתמש במחלקה המחודשת
 
 for p_type, cell in start_positions:
     try:
