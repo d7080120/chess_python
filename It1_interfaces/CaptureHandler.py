@@ -148,6 +148,24 @@ class CaptureHandler:
         new_queen.piece_id = queen_id
         new_queen._state._physics.piece_id = queen_id
         
+        # Connect the new queen to the game's queue system properly
+        new_queen._state._game_queue = self.game.game_queue
+        
+        # Set the new queen to rest_long state (as if it just moved) using proper command
+        from Command import Command
+        import time
+        now_ms = self.game.game_time_ms()  # Use the game's time method instead of time.time()
+        
+        # Process the arrived command to properly enter rest_long state
+        # This will trigger the normal state machine transition: move -> arrived -> rest_long
+        new_queen._state.state = "move"  # Set to move first
+        new_queen._state._transition("arrived", now_ms)  # Then transition to rest_long
+        print(f"💤 New queen {queen_id} properly set to rest_long state after promotion")
+        print(f"🔍 DEBUG: Queen state: {new_queen._state.state}, rest_start: {new_queen._state.rest_start}")
+        print(f"🔍 DEBUG: Required rest time: {new_queen._state.rest_time.get('rest_long', 0)}ms")
+        print(f"🔍 DEBUG: Game queue connected: {new_queen._state._game_queue is not None}")
+        print(f"🔍 DEBUG: Using game time: {now_ms} (monotonic-based)")
+        
         # Remove old pawn and add new queen
         if pawn in self.game.pieces:
             self.game.pieces.remove(pawn)
@@ -155,4 +173,7 @@ class CaptureHandler:
             
         self.game.pieces.append(new_queen)
         print(f"👑 Added new queen: {queen_id} at position {position}")
+        print(f"🔍 DEBUG: Total pieces in game: {len(self.game.pieces)}")
+        print(f"🔍 DEBUG: Queen added to pieces list successfully")
+        print(f"🔍 DEBUG: Queen has update method: {hasattr(new_queen, 'update')}")
         print(f"🎉 Promotion completed successfully! {pawn.piece_id} -> {queen_id}")

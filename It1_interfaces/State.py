@@ -42,8 +42,15 @@ class State:
         # Handle rest states
         if self.state in ("rest_short", "rest_long"):
             if self.rest_start is not None and now_ms - self.rest_start >= self.rest_time[self.state]:
+                print(f"⏰ DEBUG: Rest completed for {self.state} - transitioning to idle")
+                print(f"   Now: {now_ms}, Rest started: {self.rest_start}, Duration: {self.rest_time[self.state]}ms")
                 self._last_cmd = Command(timestamp=now_ms, piece_id=None, type="rest_done", params=None)
                 self._transition("rest_done", now_ms)
+            else:
+                if self.rest_start is not None:
+                    remaining = self.rest_time[self.state] - (now_ms - self.rest_start)
+                    if remaining > 0:
+                        print(f"💤 DEBUG: Still resting in {self.state}, {remaining}ms remaining")
         else:
             cmd = self._physics.update(now_ms)
             if cmd is not None:
