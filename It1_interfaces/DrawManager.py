@@ -192,19 +192,19 @@ class DrawManager:
             cell_width = board_width // 8
             cell_height = board_height // 8
             
-            # ציור סמן שחקן 1 (כחול עבה)
+            # ציור סמן שחקן 1 (כחול עבה - מסגרת חיצונית)
             x1, y1 = self.game.player_manager.cursor_pos_player1
             top_left_1 = (x1 * cell_width, y1 * cell_height)
             bottom_right_1 = ((x1 + 1) * cell_width - 1, (y1 + 1) * cell_height - 1)
             cv2.rectangle(img, top_left_1, bottom_right_1, (255, 0, 0), 8)  # כחול BGR עבה מאוד
             print(f"Drew THICK blue cursor at {top_left_1}-{bottom_right_1}")
             
-            # ציור סמן שחקן 2 (אדום עבה)
+            # ציור סמן שחקן 2 (אדום דק יותר - מסגרת חיצונית, יופיע מעל שחקן 1)
             x2, y2 = self.game.player_manager.cursor_pos_player2
             top_left_2 = (x2 * cell_width, y2 * cell_height)
             bottom_right_2 = ((x2 + 1) * cell_width - 1, (y2 + 1) * cell_height - 1)
-            cv2.rectangle(img, top_left_2, bottom_right_2, (0, 0, 255), 8)  # אדום BGR עבה מאוד
-            print(f"Drew THICK red cursor at {top_left_2}-{bottom_right_2}")
+            cv2.rectangle(img, top_left_2, bottom_right_2, (0, 0, 255), 5)  # אדום BGR דק יותר, יצויר מעל הכחול
+            print(f"Drew thinner red cursor at {top_left_2}-{bottom_right_2}")
             
             # סימון כלי נבחר - צריך להיות על הכלי עצמו, לא על הסמן
             if self.game.player_manager.selected_piece_player1:
