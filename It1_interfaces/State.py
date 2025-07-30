@@ -97,7 +97,7 @@ class State:
                 if elapsed_ms < required_ms:
                     remaining_sec = (required_ms - elapsed_ms) / 1000
                     print(f"🚫 {cmd.piece_id} resting in {self.state} - {remaining_sec:.1f} seconds remaining - rejecting {cmd.type} command")
-                    return self  # Reject the command
+                    return None  # Return None to indicate rejection
         
         # Handle movement commands
         if cmd.type == "move":

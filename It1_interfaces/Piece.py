@@ -17,16 +17,24 @@ class Piece:
             new_state = self._state.process_command(cmd)
             if new_state and new_state != self._state:
                 self._state = new_state  # Update to new state!
+                if hasattr(self._state, "update"):
+                    self._state.update(now_ms)
+                return True  # Command was accepted and executed
             elif not new_state:
                 # Command was rejected (invalid move) - no state change, no notify
                 if hasattr(self._state, "update"):
                     self._state.update(now_ms)
-                return None
+                return False  # Command was rejected
+            else:
+                # Same state but command was processed successfully
+                if hasattr(self._state, "update"):
+                    self._state.update(now_ms)
+                return True  # Command was accepted
         
         if hasattr(self._state, "update"):
             self._state.update(now_ms)
             
-        return self._state 
+        return True  # Default to success if no process_command method 
 
 
     def reset(self, start_ms: int = 0):

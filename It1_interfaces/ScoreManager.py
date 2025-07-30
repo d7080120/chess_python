@@ -81,8 +81,8 @@ class ScoreManager(IObserver):
         """Update score when a piece is captured"""
         print(f"🏆 Updating score for capture: white_capturing={capturing_player_is_white}, captured={captured_piece_id}")
         
-        # Extract piece type (first character after color)
-        piece_type = captured_piece_id[1] if len(captured_piece_id) > 1 else captured_piece_id[0]
+        # Extract piece type (first character - P, N, B, R, Q, K)
+        piece_type = captured_piece_id[0] if len(captured_piece_id) > 0 else 'P'
         piece_value = self.piece_values.get(piece_type, 0)
         
         print(f"🏆 Piece type: {piece_type}, value: {piece_value}")
@@ -97,7 +97,7 @@ class ScoreManager(IObserver):
     def get_player1_recent_moves(self, count: int = 10) -> List[str]:
         """Get recent moves for player 1 (white) as display strings - newest first"""
         recent_moves = [str(move) for move in self.player1_moves[-count:]]
-        return list(reversed(recent_moves))  # הפוך את הסדר - החדש ביותר בראש
+        return list(reversed(recent_moves))  # Reverse order - newest first
     
     def get_player1_recent_moves_with_numbers(self, count: int = 10) -> List[tuple]:
         """Get recent moves for player 1 with their actual move numbers - newest first"""
