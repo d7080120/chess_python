@@ -7,13 +7,15 @@ import sys
 import time
 import ctypes
 from ctypes import wintypes
+from window_utils import center_window
 
 
 class WindowFocusManager:
     """Manages automatic window focus for the chess game"""
     
-    def __init__(self, window_name: str = "Chess Game"):
+    def __init__(self, window_name: str = "Chess Game", window_position: str = "center"):
         self.window_name = window_name
+        self.window_position = window_position  # "center" או "top-left"
         self.window_handle = None
         self.focus_attempts = 0
         self.max_focus_attempts = 3
@@ -35,7 +37,11 @@ class WindowFocusManager:
             
             # הגדרות OpenCV בסיסיות
             cv2.setWindowProperty(self.window_name, cv2.WND_PROP_TOPMOST, 1)
-            cv2.moveWindow(self.window_name, 100, 100)
+            
+            # מיקום החלון לפי הבחירה (גודל משוער של חלון המשחק)
+            game_window_width = 800
+            game_window_height = 800
+            center_window(self.window_name, game_window_width, game_window_height, self.window_position)
             
             # נסיון לקבל focus אוטומטי
             self.ensure_focus()

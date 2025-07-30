@@ -3,13 +3,14 @@ InputHandler - מחלקה פשוטה לטיפול בקלט עם פוקוס או�
 """
 import cv2
 from WindowFocusManager import WindowFocusManager
+from window_settings import GAME_WINDOW_POSITION
 
 
 class InputHandler:
     def __init__(self, game_ref):
         """Initialize the input handler with game reference."""
         self.game = game_ref
-        self.focus_manager = WindowFocusManager("Chess Game")
+        self.focus_manager = WindowFocusManager("Chess Game", GAME_WINDOW_POSITION)
         self.last_key = None
         self.window_created = False  # דגל שהחלון לא נוצר עדיין
         

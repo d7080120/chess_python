@@ -6,13 +6,15 @@ import cv2
 import numpy as np
 import time
 from pathlib import Path
+from window_utils import center_window
 
 
 class PlayerNameDialog:
     """Simple GUI dialog for getting player names using OpenCV"""
     
-    def __init__(self, window_name="Chess Game - Player Names"):
+    def __init__(self, window_name="Chess Game - Player Names", window_position="center"):
         self.window_name = window_name
+        self.window_position = window_position  # "center" או "top-left"
         self.player1_name = ""
         self.player2_name = ""
         self.current_input = 1  # 1 for player1, 2 for player2
@@ -30,7 +32,10 @@ class PlayerNameDialog:
         """Create the dialog window with focus"""
         cv2.namedWindow(self.window_name, cv2.WINDOW_AUTOSIZE)
         cv2.setWindowProperty(self.window_name, cv2.WND_PROP_TOPMOST, 1)
-        cv2.moveWindow(self.window_name, 200, 100)  # התאמנו עבור חלון גדול יותר
+        
+        # מיקום החלון לפי הבחירה
+        center_window(self.window_name, self.window_width, self.window_height, self.window_position)
+        
         print(f"🖥️ Player name dialog created: '{self.window_name}'")
         print("📝 Please enter player names in the dialog window")
     

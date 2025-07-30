@@ -90,8 +90,10 @@ def create_chess_game():
     # קבל שמות שחקנים ראשון - לפני יצירת המשחק הגדול
     print("👥 Getting player names first...")
     from PlayerNameManager import PlayerNameManager
+    from window_settings import PLAYER_DIALOG_POSITION
+    
     temp_name_manager = PlayerNameManager()
-    temp_name_manager.get_player_names()
+    temp_name_manager.get_player_names(window_position=PLAYER_DIALOG_POSITION)
     
     # צור את המשחק אחרי שמות השחקנים
     print("🎮 Initializing GameRefactored...")

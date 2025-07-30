@@ -10,12 +10,16 @@ class PlayerNameManager:
         self.player1_name = ""
         self.player2_name = ""
         
-    def get_player_names(self):
-        """Get player names using GUI dialog."""
+    def get_player_names(self, window_position="top-left"):
+        """Get player names using GUI dialog.
+        
+        Args:
+            window_position: "center" for screen center, "top-left" for top-left corner
+        """
         print("🎮 Opening player name dialog...")
         
         # יצירת דיאלוג GUI לקבלת השמות
-        dialog = PlayerNameDialog()
+        dialog = PlayerNameDialog(window_position=window_position)
         
         try:
             # קבלת השמות דרך הדיאלוג
