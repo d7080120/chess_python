@@ -147,11 +147,11 @@ class MoveValidator:
             
             move_is_valid = False
             
-            # Check each possible move - coordinates only, no move types
+            # Check each possible move - now including move types for pawns
             for move_dx, move_dy, move_type in valid_moves:
                 # Pawn move files: need to reverse direction
                 # White and black pawns are reversed in coordinate system
-                if piece.piece_id.startswith('P'):  # Pawns - reverse direction
+                if piece.piece_id.startswith('P'):  # Pawns - special validation
                     # File says (0,-1) and this should remain (0,-1)
                     actual_dx = move_dx  # Keep as is
                     actual_dy = move_dy  # Keep as is
@@ -161,15 +161,27 @@ class MoveValidator:
                         if not self._is_pawn_first_move(piece):
                             print(f"❌ Pawn 2-step move only allowed on first move")
                             continue  # Skip this move option
+                    
+                    # 🎯 PAWN SPECIAL RULES: Check move type vs capture situation
+                    if move_type == 'capture':
+                        # Capture moves (diagonal) - only valid if there's an enemy piece
+                        if not is_capture:
+                            print(f"❌ Pawn diagonal move requires capture, but no piece at target")
+                            continue
+                    elif move_type == 'non_capture' or move_type == '1st':
+                        # Forward moves - only valid if no piece at target
+                        if is_capture:
+                            print(f"❌ Pawn forward move blocked by piece")
+                            continue
                 else:  # All other pieces - use as is
                     actual_dx = move_dx
                     actual_dy = move_dy
                 
                 print(f"🔍 Checking move ({move_dx},{move_dy},{move_type}) -> translated: ({actual_dx},{actual_dy})")
                 
-                # Check if move matches - coordinates only!
+                # Check if move matches coordinates
                 if dx == actual_dx and dy == actual_dy:
-                    print(f"✅ Move matches! Difference ({dx},{dy}) = coordinates ({actual_dx},{actual_dy})")
+                    print(f"✅ Move matches! Difference ({dx},{dy}) = coordinates ({actual_dx},{actual_dy}), type: {move_type}")
                     move_is_valid = True
                     break
             
