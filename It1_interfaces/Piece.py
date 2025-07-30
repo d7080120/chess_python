@@ -12,14 +12,21 @@ class Piece:
 
     def on_command(self, cmd: Command, now_ms: int):
         """Handle a command for this piece."""
-
+        
         if hasattr(self._state, "process_command"):
-            state = self._state.process_command(cmd)
-            # self._state = state
+            new_state = self._state.process_command(cmd)
+            if new_state and new_state != self._state:
+                self._state = new_state  # Update to new state!
+            elif not new_state:
+                # Command was rejected (invalid move) - no state change, no notify
+                if hasattr(self._state, "update"):
+                    self._state.update(now_ms)
+                return None
+        
         if hasattr(self._state, "update"):
             self._state.update(now_ms)
-        print (state != self._state)
-        return state 
+            
+        return self._state 
 
 
     def reset(self, start_ms: int = 0):
@@ -35,20 +42,20 @@ class Piece:
     def draw_on_board(self, board: Board, now_ms: int):
         """
         Draw the piece on the board using its graphics and physics position.
-        משתמש ב-pixel_pos עבור אנימציה חלקה במקום cell
+        Uses pixel_pos for smooth animation instead of cell
         """
         graphics = getattr(self._state, "_graphics", None)
         physics = getattr(self._state, "_physics", None)
         if graphics is not None and physics is not None:
             img = graphics.get_img()
-            # השתמש במיקום הפיקסל החלק במקום תא
+            # Use smooth pixel position instead of cell
             pixel_pos = getattr(physics, "pixel_pos", None)
             if pixel_pos is not None:
                 x, y = pixel_pos
                 img.draw_on(board.img, x, y)
-                # debug: הצג גם את מיקום התא ומיקום הפיקסל
+                # debug: show both cell position and pixel position
                 cell = getattr(physics, "cell", None)
                 # if physics.moving:
-                #     print(f"🏃 מצייר {self.piece_id}: תא {cell} -> פיקסל ({x}, {y})")
+                #     print(f"🏃 Drawing {self.piece_id}: cell {cell} -> pixel ({x}, {y})")
                 # else:
-                #     print(f"🧘 מצייר {self.piece_id} במנוחה ב-{cell} -> פיקסל ({x}, {y})")
+                #     print(f"🧘 Drawing {self.piece_id} at rest in {cell} -> pixel ({x}, {y})")

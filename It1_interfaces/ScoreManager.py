@@ -3,6 +3,8 @@ ScoreManager - מחלקה לניהול ניקוד והיסטוריית מהלכ�
 """
 from typing import List, Tuple
 import time
+from observer import IObserver
+from Command import Command
 
 
 class MoveRecord:
@@ -27,7 +29,7 @@ class MoveRecord:
             return f"{self.piece_id}: {from_str}-{to_str}"
 
 
-class ScoreManager:
+class ScoreManager(IObserver):
     """Manages scoring and move history for both players"""
     
     def __init__(self, game_ref):
@@ -55,30 +57,35 @@ class ScoreManager:
     def record_move(self, piece_id: str, from_pos: Tuple[int, int], to_pos: Tuple[int, int], 
                    move_type: str = "move", captured_piece: str = None):
         """Record a move for the appropriate player"""
+        print(f"📝 Recording move: {piece_id} from {from_pos} to {to_pos}, type: {move_type}, captured: {captured_piece}")
+        
         move = MoveRecord(piece_id, from_pos, to_pos, move_type, captured_piece)
         
         # Determine which player made the move
         is_white_piece = 'W' in piece_id
         if is_white_piece:
             self.player1_moves.append(move)
-            # Keep only last 10 moves
-            if len(self.player1_moves) > 10:
-                self.player1_moves.pop(0)
+            print(f"📝 Added move to player 1 history. Total moves: {len(self.player1_moves)}")
+            # Keep full history - no limit
         else:
             self.player2_moves.append(move)
-            # Keep only last 10 moves
-            if len(self.player2_moves) > 10:
-                self.player2_moves.pop(0)
+            print(f"📝 Added move to player 2 history. Total moves: {len(self.player2_moves)}")
+            # Keep full history - no limit
         
-        # Update score if it's a capture
-        if move_type == "capture" and captured_piece:
+        # Update score if there's a captured piece (regardless of move_type)
+        if captured_piece:
+            print(f"🏆 Processing capture for scoring...")
             self._update_score_for_capture(is_white_piece, captured_piece)
     
     def _update_score_for_capture(self, capturing_player_is_white: bool, captured_piece_id: str):
         """Update score when a piece is captured"""
+        print(f"🏆 Updating score for capture: white_capturing={capturing_player_is_white}, captured={captured_piece_id}")
+        
         # Extract piece type (first character after color)
         piece_type = captured_piece_id[1] if len(captured_piece_id) > 1 else captured_piece_id[0]
         piece_value = self.piece_values.get(piece_type, 0)
+        
+        print(f"🏆 Piece type: {piece_type}, value: {piece_value}")
         
         if capturing_player_is_white:
             self.player1_score += piece_value
@@ -92,9 +99,41 @@ class ScoreManager:
         recent_moves = [str(move) for move in self.player1_moves[-count:]]
         return list(reversed(recent_moves))  # הפוך את הסדר - החדש ביותר בראש
     
+    def get_player1_recent_moves_with_numbers(self, count: int = 10) -> List[tuple]:
+        """Get recent moves for player 1 with their actual move numbers - newest first"""
+        total_moves = len(self.player1_moves)
+        recent_moves = []
+        
+        # קח את המהלכים האחרונים
+        moves_to_show = self.player1_moves[-count:]
+        start_number = max(1, total_moves - count + 1)
+        
+        # צור רשימה עם המספרים האמיתיים
+        for i, move in enumerate(moves_to_show):
+            move_number = start_number + i
+            recent_moves.append((move_number, str(move)))
+        
+        return list(reversed(recent_moves))  # הפוך את הסדר - החדש ביותר בראש
+    
     def get_player2_recent_moves(self, count: int = 10) -> List[str]:
         """Get recent moves for player 2 (black) as display strings - newest first"""
         recent_moves = [str(move) for move in self.player2_moves[-count:]]
+        return list(reversed(recent_moves))  # הפוך את הסדר - החדש ביותר בראש
+    
+    def get_player2_recent_moves_with_numbers(self, count: int = 10) -> List[tuple]:
+        """Get recent moves for player 2 with their actual move numbers - newest first"""
+        total_moves = len(self.player2_moves)
+        recent_moves = []
+        
+        # קח את המהלכים האחרונים
+        moves_to_show = self.player2_moves[-count:]
+        start_number = max(1, total_moves - count + 1)
+        
+        # צור רשימה עם המספרים האמיתיים
+        for i, move in enumerate(moves_to_show):
+            move_number = start_number + i
+            recent_moves.append((move_number, str(move)))
+        
         return list(reversed(recent_moves))  # הפוך את הסדר - החדש ביותר בראש
     
     def get_scores(self) -> Tuple[int, int]:
@@ -129,3 +168,35 @@ class ScoreManager:
         for i, move in enumerate(self.get_player2_recent_moves(5), 1):
             print(f"   {i}. {move}")
         print("="*50)
+
+    def update(self, command: Command):
+        """Observer update method - called when command is successfully executed"""
+        if command.type in ["move", "jump", "capture"]:
+            # נתח את הפקודה כדי לחלץ נתונים למהלך
+            piece_id = command.piece_id
+            from_pos = getattr(command, 'source', None)  # אם יש מיקום מקור
+            to_pos = command.target if hasattr(command, 'target') else None
+            
+            # קבע סוג המהלך
+            move_type = command.type
+            captured_piece = None
+            
+            # בדוק אם יש מידע על כלי שנתפס (גם ב-move וגם ב-capture)
+            if hasattr(command, 'params') and command.params:
+                captured_piece = command.params[0] if len(command.params) > 0 else None
+                print(f"🎯 ScoreManager: found captured piece: {captured_piece} in command {command.type}")
+            
+            # אם אין מיקום מקור, נשתמש במיקום הנוכחי של הכלי במשחק
+            if not from_pos and hasattr(self.game, 'pieces'):
+                for piece in self.game.pieces:
+                    if piece.piece_id == piece_id:
+                        if hasattr(piece, '_state') and hasattr(piece._state, '_physics'):
+                            from_pos = piece._state._physics.cell
+                            break
+            
+            # רשום את המהלך אם יש לנו את כל הנתונים
+            if from_pos and to_pos:
+                self.record_move(piece_id, from_pos, to_pos, move_type, captured_piece)
+                print(f"📝 ScoreManager: recorded move {piece_id} from {from_pos} to {to_pos} (Observer)")
+            else:
+                print(f"⚠️ ScoreManager: cannot record move - missing information: from_pos={from_pos}, to_pos={to_pos}")

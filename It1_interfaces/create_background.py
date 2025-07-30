@@ -89,29 +89,29 @@ def save_background():
     success = cv2.imwrite(str(save_path), background)
     
     if success:
-        print(f"✅ תמונת הרקע נשמרה בהצלחה: {save_path}")
+        print(f"✅ Background image saved successfully: {save_path}")
         return True
     else:
-        print(f"❌ שגיאה בשמירת תמונת הרקע")
+        print(f"❌ Error saving background image")
         return False
 
 if __name__ == "__main__":
-    print("🎨 יוצר תמונת רקע למשחק השח...")
+    print("🎨 Creating background image for chess game...")
     
-    # בדוק אם כבר יש תמונת רקע
+    # Check if background image already exists
     bg_path = pathlib.Path(__file__).parent.parent / "background.png"
     if bg_path.exists():
-        print(f"⚠️ תמונת רקע כבר קיימת: {bg_path}")
-        response = input("האם לדרוס? (y/n): ")
+        print(f"⚠️ Background image already exists: {bg_path}")
+        response = input("Overwrite? (y/n): ")
         if response.lower() != 'y':
-            print("ביטול היצירה")
+            print("Canceling creation")
             exit()
     
     success = save_background()
     
     if success:
-        print("🎉 תמונת הרקע מוכנה!")
-        print("🎮 עכשיו אפשר להריץ את המשחק עם:")
+        print("🎉 Background image ready!")
+        print("🎮 Now you can run the game with:")
         print("   python main_refactored.py")
     else:
-        print("❌ שגיאה ביצירת תמונת הרקע")
+        print("❌ Error creating background image")

@@ -27,7 +27,7 @@ class Physics:
         """
         אתחול פיזיקה לפי פקודה חדשה (למשל התחלת תנועה, קפיצה, עמידה).
         """
-        # print(f"🔧 Physics.reset: קיבל פקודה {cmd.type} מ-{self.cell} ל-{getattr(cmd, 'target', 'N/A')}")
+        # print(f"🔧 Physics.reset: Received command {cmd.type} from {self.cell} to {getattr(cmd, 'target', 'N/A')}")
         self.mode = cmd.type
         if cmd.type == "move":
             self.start_cell = self.cell  # שמירת המיקום ההתחלתי לאינטרפולציה
@@ -38,7 +38,7 @@ class Physics:
             # מהירות תנועה - נוודא שתמיד יש מהירות חיובית
             move_speed = 2.0  # תאים לשנייה - מהירות תנועה מהירה יותר
             dist = self._cell_distance(self.cell, self.target_cell)
-            # print(f"🔧 Physics: מרחק מ-{self.cell} ל-{self.target_cell} = {dist}, מהירות = {move_speed}")
+            # print(f"🔧 Physics: Distance from {self.cell} to {self.target_cell} = {dist}, speed = {move_speed}")
             if dist == 0:
                 self.end_time = self.start_time + 100  # 100ms מינימום
             else:
@@ -69,7 +69,7 @@ class Physics:
                 self.cell = self.target_cell
                 self.pixel_pos = self.board.cell_to_pixel(self.cell)
                 self.moving = False
-                print(f"🏁 פיזיקה: החתיכה ב-{self.cell} הגיעה ליעד")
+                print(f"🏁 Physics: Piece at {self.cell} reached target")
                 return Command(timestamp=now_ms, piece_id=self.piece_id, type="arrived", target=self.cell, params=None)
             else:
                 # תנועה בתהליך - אינטרפולציה חלקה
@@ -88,7 +88,7 @@ class Physics:
                 self.pixel_pos = (int(x), int(y))
         elif self.mode == "jump" and now_ms >= self.end_time:
             # קפיצה הסתיימה - צריך ליצור פקודת arrived
-            print(f"🏁 פיזיקה: החתיכה קפצה ל-{self.cell}")
+            print(f"🏁 Physics: Piece jumped to {self.cell}")
             self.mode = "idle"  # סיום הקפיצה
             return Command(timestamp=now_ms, piece_id=self.piece_id, type="arrived", target=self.cell, params=None)
         return None

@@ -104,39 +104,39 @@ class DrawManager:
         # כותרת עם שם השחקן
         cv2.rectangle(img, (x_start, 0), (x_start + width, 80), (200, 200, 255), -1)  # רקע כחול בהיר - יותר גבוה
         
-        # שם השחקן - גופן גדול יותר
+        # שם השחקן - גופן מעוצב יותר
         cv2.putText(img, player_name, (x_start + 10, 30), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+                   cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 0, 0), 2)
         cv2.putText(img, "(WHITE)", (x_start + 10, 60), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+                   cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 0, 0), 2)
         
-        # ניקוד - גופן גדול יותר
+        # ניקוד - גופן מעוצב יותר
         if hasattr(self.game, 'score_manager'):
             score1, _ = self.game.score_manager.get_scores()
             cv2.putText(img, f"Score: {score1}", (x_start + 10, 110), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+                       cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 0, 0), 2)  # Changed to black
         
-        # היסטוריית מהלכים - כותרת גדולה יותר
+        # היסטוריית מהלכים - כותרת מעוצבת יותר
         cv2.putText(img, "Recent Moves:", (x_start + 10, 150), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 2)
+                   cv2.FONT_HERSHEY_DUPLEX, 0.7, (200, 200, 200), 2)
         
         if hasattr(self.game, 'score_manager'):
-            moves = self.game.score_manager.get_player1_recent_moves(10)
+            moves_with_numbers = self.game.score_manager.get_player1_recent_moves_with_numbers(10)
             # רקע לבן קטן למהלכים (כמו דף נייר)
-            if moves:
-                moves_bg_height = min(len(moves) * 35 + 20, height - 200)
+            if moves_with_numbers:
+                moves_bg_height = min(len(moves_with_numbers) * 35 + 20, height - 200)
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
                              (240, 240, 240), -1)  # רקע לבן
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
                              (180, 180, 180), 2)   # גבול אפור
             
-            for i, move in enumerate(moves):
+            for i, (move_number, move) in enumerate(moves_with_numbers):
                 y = 195 + (i * 35)  # רווח גדול יותר בין המהלכים
                 if y > height - 40:
                     break
-                # מהלכים בגופן גדול וברור יותר - מספור נכון (החדש ביותר בראש)
-                cv2.putText(img, f"{i+1}. {move}", (x_start + 15, y), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)  # טקסט שחור על רקע לבן
+                # מהלכים בגופן מעוצב וברור יותר - מספור אמיתי מתחילת המשחק - שחקן 1
+                cv2.putText(img, f"{move_number}. {move}", (x_start + 15, y), 
+                           cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)  # טקסט שחור על רקע לבן
 
     def _draw_right_panel(self, img, x_start, width, height):
         """Draw right panel for Player 2 (Black)"""
@@ -146,39 +146,39 @@ class DrawManager:
         # כותרת עם שם השחקן
         cv2.rectangle(img, (x_start, 0), (x_start + width, 80), (100, 100, 100), -1)  # רקע אפור כהה - יותר גבוה
         
-        # שם השחקן - גופן גדול יותר
+        # שם השחקן - גופן מעוצב יותר
         cv2.putText(img, player_name, (x_start + 10, 30), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+                   cv2.FONT_HERSHEY_DUPLEX, 0.9, (255, 255, 255), 2)
         cv2.putText(img, "(BLACK)", (x_start + 10, 60), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                   cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 255, 255), 2)
         
-        # ניקוד - גופן גדול יותר
+        # ניקוד - גופן מעוצב יותר
         if hasattr(self.game, 'score_manager'):
             _, score2 = self.game.score_manager.get_scores()
             cv2.putText(img, f"Score: {score2}", (x_start + 10, 110), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+                       cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 0, 0), 2)  # Changed to black
         
-        # היסטוריית מהלכים - כותרת גדולה יותר
+        # היסטוריית מהלכים - כותרת מעוצבת יותר
         cv2.putText(img, "Recent Moves:", (x_start + 10, 150), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 2)
+                   cv2.FONT_HERSHEY_DUPLEX, 0.7, (200, 200, 200), 2)
         
         if hasattr(self.game, 'score_manager'):
-            moves = self.game.score_manager.get_player2_recent_moves(10)
+            moves_with_numbers = self.game.score_manager.get_player2_recent_moves_with_numbers(10)
             # רקע לבן קטן למהלכים (כמו דף נייר)
-            if moves:
-                moves_bg_height = min(len(moves) * 35 + 20, height - 200)
+            if moves_with_numbers:
+                moves_bg_height = min(len(moves_with_numbers) * 35 + 20, height - 200)
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
                              (240, 240, 240), -1)  # רקע לבן
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
                              (180, 180, 180), 2)   # גבול אפור
             
-            for i, move in enumerate(moves):
+            for i, (move_number, move) in enumerate(moves_with_numbers):
                 y = 195 + (i * 35)  # רווח גדול יותר בין המהלכים
                 if y > height - 40:
                     break
-                # מהלכים בגופן גדול וברור יותר - מספור נכון (החדש ביותר בראש)
-                cv2.putText(img, f"{i+1}. {move}", (x_start + 15, y), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)  # טקסט שחור על רקע לבן
+                # מהלכים בגופן מעוצב וברור יותר - מספור אמיתי מתחילת המשחק - שחקן 2
+                cv2.putText(img, f"{move_number}. {move}", (x_start + 15, y), 
+                           cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)  # טקסט שחור על רקע לבן
 
     def _draw_cursors(self, board):
         """Draw player cursors on the board."""

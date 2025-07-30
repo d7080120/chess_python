@@ -75,9 +75,9 @@ class Graphics:
             self.sprites_folder = new_sprites_dir
             self.frames = self._load_frames()
             self.current_frame = 0
-            print(f"🎨 Graphics החליף למצב {state_name} - {len(self.frames)} פריימים")
+            print(f"🎨 Graphics switched to state {state_name} - {len(self.frames)} frames")
         else:
-            print(f"⚠️ תיקיית sprites לא נמצאה למצב {state_name}: {new_sprites_dir}")
+            print(f"⚠️ Sprites directory not found for state {state_name}: {new_sprites_dir}")
 
     def update(self, now_ms: int):
         """Advance animation frame based on game-loop time, not wall time."""

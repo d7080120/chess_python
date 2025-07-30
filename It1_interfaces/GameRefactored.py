@@ -1,5 +1,5 @@
 """
-GameRefactored - גרסה מחודשת של מחלקת Game עם הפרדה למחלקות
+GameRefactored - Refactored version of Game class with separated classes
 """
 import inspect
 import pathlib
@@ -12,7 +12,6 @@ from Piece import Piece
 from integration_setup import setup_observers
 from sound_player import SoundPlayer
 
-# ייבוא המחלקות החדשות
 from InputHandler import InputHandler
 from PlayerManager import PlayerManager
 from DrawManager import DrawManager
@@ -30,15 +29,18 @@ class InvalidBoard(Exception):
 class GameRefactored:
     def __init__(self, pieces: List[Piece], board: Board):
         """Initialize the game with pieces and board."""
-        self.pieces = pieces  # שמור כרשימה במקום כמילון
+        self.pieces = pieces
         self.board = board
         self.user_input_queue = queue.Queue()
-        self.command_subject, self.logger, self.scorer, self.sound_player = setup_observers()
+        self.game_queue = queue.Queue()  # Queue for arrived commands from pieces
+        
+        # Setup observers - ScoreManager is created here
+        self.command_subject, self.logger, self.scorer, self.sound_player, self.score_manager = setup_observers(self)
 
-        # דגל סיום המשחק
+        # Game over flag
         self.game_over = False
 
-        # יצירת המחלקות המסייעות
+        # Initialize helper classes
         self.player_name_manager = PlayerNameManager()
         self.input_handler = InputHandler(self)
         self.player_manager = PlayerManager(self)
@@ -46,7 +48,6 @@ class GameRefactored:
         self.capture_handler = CaptureHandler(self)
         self.win_checker = WinChecker(self)
         self.move_validator = MoveValidator(self)
-        self.score_manager = ScoreManager(self)
 
     # ─── helpers ─────────────────────────────────────────────────────────────
     def game_time_ms(self) -> int:
@@ -55,30 +56,30 @@ class GameRefactored:
 
     def clone_board(self) -> Board:
         """
-        Return a **brand-new** Board wrapping a copy of the background pixels
+        Return a brand-new Board wrapping a copy of the background pixels
         so we can paint sprites without touching the pristine board.
         """
         return self.board.clone()
 
     def start_user_input_thread(self):
         """Start the user input thread for mouse handling."""
-        # התור כבר נוצר בקונסטרקטור - אל תדרוס אותו!
-        # אפשר להפעיל thread אמיתי בעתיד
+        # Queue already created in constructor - don't override it!
+        # Can activate real thread in the future
         pass
 
     # ─── main public entrypoint ──────────────────────────────────────────────
     def run(self):
         """Main game loop."""
         
-        self.start_user_input_thread() # QWe2e5
+        self.start_user_input_thread()
         
         start_ms = self.game_time_ms()
         for p in self.pieces:
             p.reset(start_ms)
         
-        # ─────── main loop ──────────────────────────────────────────────────
+        # Main loop
         while not self.game_over:
-            now = self.game_time_ms() # monotonic time ! not computer time.
+            now = self.game_time_ms()
 
             # (1) update physics & animations
             for p in self.pieces:
@@ -89,41 +90,41 @@ class GameRefactored:
                 cmd: Command = self.user_input_queue.get()
                 self._process_input(cmd)
                 
-                # בדוק אם המשחק נגמר
                 if self.game_over:
-                    break
+                    return
+                    
+            # (3) handle arrived commands from pieces
+            while not self.game_queue.empty():
+                cmd: Command = self.game_queue.get()
+                self._process_input(cmd)
 
-            # (3) draw current position
+            # (4) draw current position
             self.draw_manager.draw_game()
-            if not self.input_handler.show_frame():           # returns False if user closed window
+            if not self.input_handler.show_frame():
                 break
 
-            # (4) detect captures
+            # (5) detect captures
             self._resolve_collisions()
             
-            # (5) שליטה בקצב פריימים - 60 FPS
+            # (6) 60 FPS control
             import time
-            time.sleep(1/60.0)  # ~16.7ms המתנה
+            time.sleep(1/60.0)
 
-        # אם המשחק נגמר בגלל נצחון ולא בגלל סגירת החלון
+        # Game ended
         if self.game_over:
-            print("🎮 המשחק הסתיים עקב נצחון!")
-            print("🎮 Game ended due to victory!")
+            print("Game ended due to victory!")
             
-            # בדוק אם יש קומנדים שלא עובדו בתור
+            # Check for remaining commands in queue
             remaining_count = 0
-            print(f"🔍 בודק קומנדים שנותרו בתור...")
             while not self.user_input_queue.empty():
                 cmd = self.user_input_queue.get()
                 remaining_count += 1
-                print(f"🔍 קומנד שלא עובד: type='{cmd.type}', piece_id='{cmd.piece_id}', target={cmd.target}")
-            print(f"🔍 סה\"כ קומנדים שלא עובדו: {remaining_count}")
+            if remaining_count > 0:
+                print(f"Remaining unprocessed commands: {remaining_count}")
         else:
-            print("🎮 המשחק נגמר!")
-            print("🎮 Game Over!")
+            print("Game Over!")
         cv2.destroyAllWindows()
 
-    # ─── drawing helpers ────────────────────────────────────────────────────
     def _process_input(self, cmd: Command):
         """Process input commands and delegate to appropriate handlers."""
         if cmd.type == "arrived":
@@ -133,18 +134,17 @@ class GameRefactored:
         for piece in self.pieces:
             if piece.piece_id == cmd.piece_id:
                 if piece.on_command(cmd, self.game_time_ms()):
-                    self.command_subject.notify(cmd)  # נוטיפיקציה לכל המאזינים
+                    self.command_subject.notify(cmd)
 
-                # 🏆 בדיקת תנאי נצחון אחרי כל תנועה!
+                # Check win condition after each move
                 if self.win_checker.is_win():
                     self.win_checker.announce_win()
-                    self.game_over = True  # סמן שהמשחק נגמר
-                    return  # עצור את המשחק
+                    self.game_over = True
+                    return
                 break
         else:
-            print(f"❌ לא נמצא כלי עם ID: {cmd.piece_id}")
+            print(f"Piece not found: {cmd.piece_id}")
 
-    # ─── capture resolution ────────────────────────────────────────────────
     def _resolve_collisions(self):
         """Resolve piece collisions and captures."""
-        pass  # לממש לוגיקת תפיסות בהמשך
+        pass

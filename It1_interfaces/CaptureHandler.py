@@ -12,9 +12,9 @@ class CaptureHandler:
 
     def handle_arrival(self, cmd: Command):
         """Handle piece arrival and check for captures."""
-        print(f"🏁 כלי הגיע ליעד: {cmd.piece_id}")
+        print(f"🏁 Piece arrived at destination: {cmd.piece_id}")
         
-        # מצא את הכלי שהגיע ליעד
+        # Find the piece that arrived at the destination
         arriving_piece = None
         for piece in self.game.pieces:
             if piece.piece_id == cmd.piece_id:
@@ -22,140 +22,137 @@ class CaptureHandler:
                 break
         
         if not arriving_piece:
-            print(f"❌ לא נמצא כלי שהגיע: {cmd.piece_id}")
+            print(f"❌ Arriving piece not found: {cmd.piece_id}")
             return
         
-        # קבל את המיקום של הכלי שהגיע
+        # Get the position of the arriving piece
         target_pos = arriving_piece._state._physics.cell
         
-        # נניח שהכלי הגיע ממיקום קודם - נשתמש במיקום הנוכחי כמיקום מוצא
-        from_pos = target_pos  # זה לא מדויק אבל יעבוד לעכשיו
+        # Assume the piece came from a previous position - we'll use current position as source for now
+        from_pos = target_pos  # This is not accurate but will work for now
         
-        # בדוק הכתרת חיילים לפני בדיקת תפיסה
+        # Check pawn promotion before checking capture
         self._check_pawn_promotion(arriving_piece, target_pos)
         
-        print(f"🎯 בודק תפיסה במיקום {target_pos}")
-        print(f"🔍 רשימת כל הכלים והמיקומים שלהם:")
+        print(f"🎯 Checking capture at position {target_pos}")
+        print(f"🔍 List of all pieces and their positions:")
         
-        # הצג את כל הכלים והמיקומים שלהם
+        # Display all pieces and their positions
         for piece in self.game.pieces:
             piece_pos = piece._state._physics.cell
-            print(f"   {piece.piece_id} במיקום {piece_pos}")
+            print(f"   {piece.piece_id} at position {piece_pos}")
         
-        # חפש כלי יריב באותו מיקום
+        # Search for enemy piece at the same position
         pieces_to_remove = []
         for piece in self.game.pieces:
-            if piece != arriving_piece:  # לא אותו כלי
+            if piece != arriving_piece:  # Not the same piece
                 piece_pos = piece._state._physics.cell
-                print(f"🔍 בודק {piece.piece_id} במיקום {piece_pos} מול {target_pos}")
+                print(f"🔍 Checking {piece.piece_id} at position {piece_pos} vs {target_pos}")
                 if piece_pos == target_pos:
-                    # בדוק אם זה כלי יריב
+                    # Check if it's an enemy piece
                     arriving_is_white = 'W' in arriving_piece.piece_id
                     piece_is_white = 'W' in piece.piece_id
                     
-                    print(f"🎯 מצאתי כלי באותו מיקום! {piece.piece_id} (לבן: {piece_is_white}) vs {arriving_piece.piece_id} (לבן: {arriving_is_white})")
+                    print(f"🎯 Found piece at same position! {piece.piece_id} (white: {piece_is_white}) vs {arriving_piece.piece_id} (white: {arriving_is_white})")
                     
-                    if arriving_is_white != piece_is_white:  # צבעים שונים = יריבים
-                        print(f"⚔️ {arriving_piece.piece_id} תפס את {piece.piece_id} במיקום {target_pos}!")
+                    if arriving_is_white != piece_is_white:  # Different colors = enemies
+                        print(f"⚔️ {arriving_piece.piece_id} captured {piece.piece_id} at position {target_pos}!")
                         pieces_to_remove.append(piece)
                         
-                        # עדכן את מנהל הניקוד
-                        if hasattr(self.game, 'score_manager'):
-                            self.game.score_manager.record_move(
-                                arriving_piece.piece_id, 
-                                from_pos, 
-                                target_pos, 
-                                "capture", 
-                                piece.piece_id
-                            )
+                        # Move logging will be handled via Observer pattern
                         
-                        # בדיקה מיוחדת למלכים
+                        # Special check for kings
                         if piece.piece_id in ["KW0", "KB0"]:
                             print(f"🚨🚨 CRITICAL: KING CAPTURED! {piece.piece_id} was taken! 🚨🚨🚨")
-                            print(f"💀 מלך נהרג: {piece.piece_id}")
-                            print(f"🔥 זה יגרום לסיום המשחק!")
+                            print(f"💀 King killed: {piece.piece_id}")
+                            print(f"🔥 This will cause game over!")
                     else:
-                        print(f"🛡️ אותו צבע - לא תוקף: {piece.piece_id} ו-{arriving_piece.piece_id}")
+                        print(f"🛡️ Same color - no attack: {piece.piece_id} and {arriving_piece.piece_id}")
         
-        print(f"📋 כלים לתפיסה: {[p.piece_id for p in pieces_to_remove]}")
+        print(f"📋 Pieces to capture: {[p.piece_id for p in pieces_to_remove]}")
         
-        # הסר את הכלים הנתפסים
+        # Remove captured pieces
         for piece in pieces_to_remove:
             if piece in self.game.pieces:
                 self.game.pieces.remove(piece)
-                print(f"🗑️ הסרתי {piece.piece_id} מרשימת הכלים")
+                print(f"🗑️ Removed {piece.piece_id} from pieces list")
                 
-                # DEBUG נוסף - ספירת מלכים אחרי הסרה
+                # Additional DEBUG - count kings after removal
                 if piece.piece_id in ["KW0", "KB0"]:
                     remaining_kings = [p.piece_id for p in self.game.pieces if p.piece_id in ["KW0", "KB0"]]
-                    print(f"👑 מלכים שנותרו אחרי הסרת {piece.piece_id}: {remaining_kings}")
-                    print(f"📊 סה'כ כלים נותרים: {len(self.game.pieces)}")
+                    print(f"👑 Kings remaining after removing {piece.piece_id}: {remaining_kings}")
+                    print(f"📊 Total pieces remaining: {len(self.game.pieces)}")
                     
-                    # בדיקה מיידית של תנאי נצחון
+                    # Immediate check for victory conditions
                     white_kings = [p for p in self.game.pieces if p.piece_id == "KW0"]
                     black_kings = [p for p in self.game.pieces if p.piece_id == "KB0"]
-                    print(f"🔍 מלכים לבנים: {len(white_kings)}, מלכים שחורים: {len(black_kings)}")
+                    print(f"🔍 White kings: {len(white_kings)}, Black kings: {len(black_kings)}")
                     
                     if len(white_kings) == 0:
-                        print("🏆 אין מלך לבן - שחקן 2 אמור לנצח!")
+                        print("🏆 No white king - Player 2 should win!")
                     if len(black_kings) == 0:
-                        print("🏆 אין מלך שחור - שחקן 1 אמור לנצח!")
+                        print("🏆 No black king - Player 1 should win!")
         
-        # בדוק תנאי נצחון אחרי תפיסה
+        # Check victory conditions after capture
         if pieces_to_remove:
             if self.game.win_checker.is_win():
                 self.game.win_checker.announce_win()
-                self.game.game_over = True  # סמן שהמשחק נגמר מיד אחרי נצחון
+                self.game.game_over = True  # Mark game as over immediately after victory
+        
+        # DEBUG: Print attacking piece position after capture
+        final_pos = arriving_piece._state._physics.cell
+        print(f"🔍 DEBUG: After capture - {arriving_piece.piece_id} at position {final_pos}")
+        print(f"🔍 DEBUG: This means the piece should be selectable at position {final_pos}")
 
     def _check_pawn_promotion(self, piece, target_pos):
         """Check if a pawn should be promoted to queen."""
-        # בדוק אם זה חייל
+        # Check if it's a pawn
         if not piece.piece_id.startswith('P'):
-            return  # לא חייל - אין הכתרה
+            return  # Not a pawn - no promotion
             
-        col, row = target_pos  # target_pos הוא (x, y) = (col, row)
+        col, row = target_pos  # target_pos is (x, y) = (col, row)
         is_white_pawn = 'W' in piece.piece_id
         is_black_pawn = 'B' in piece.piece_id
         
-        # בדוק אם החייל הגיע לשורה המתאימה להכתרה
+        # Check if the pawn reached the appropriate promotion row
         should_promote = False
         new_piece_type = None
         
-        if is_white_pawn and row == 0:  # חייל לבן הגיע לשורה 0
+        if is_white_pawn and row == 0:  # White pawn reached row 0
             should_promote = True
             new_piece_type = "QW"
-            print(f"👑 חייל לבן {piece.piece_id} הגיע לשורה 0 - הכתרה למלכה!")
-        elif is_black_pawn and row == 7:  # חייל שחור הגיע לשורה 7
+            print(f"👑 White pawn {piece.piece_id} reached row 0 - promoting to queen!")
+        elif is_black_pawn and row == 7:  # Black pawn reached row 7
             should_promote = True
             new_piece_type = "QB"
-            print(f"👑 חייל שחור {piece.piece_id} הגיע לשורה 7 - הכתרה למלכה!")
+            print(f"👑 Black pawn {piece.piece_id} reached row 7 - promoting to queen!")
             
         if should_promote:
             self._promote_pawn_to_queen(piece, new_piece_type, target_pos)
 
     def _promote_pawn_to_queen(self, pawn, queen_type, position):
         """Replace a pawn with a queen at the given position."""
-        print(f"🎆 מבצע הכתרה: {pawn.piece_id} -> {queen_type} במיקום {position}")
+        print(f"🎆 Performing promotion: {pawn.piece_id} -> {queen_type} at position {position}")
         pieces_root = pathlib.Path(__file__).parent.parent / "pieces"
         
-        # צור מלכה חדשה
+        # Create new queen
         from PieceFactory import PieceFactory
         factory = PieceFactory(self.game.board, pieces_root)
         
-        # יצירת ID ייחודי למלכה החדשה
+        # Create unique ID for the new queen
         existing_queens = [p for p in self.game.pieces if p.piece_id.startswith(queen_type)]
         queen_id = f"{queen_type}{len(existing_queens)}"
         
-        # צור מלכה חדשה במיקום הנדרש
+        # Create new queen at required position
         new_queen = factory.create_piece(queen_type, position, self.game.user_input_queue)
         new_queen.piece_id = queen_id
         new_queen._state._physics.piece_id = queen_id
         
-        # הסר את החייל הישן והוסף את המלכה החדשה
+        # Remove old pawn and add new queen
         if pawn in self.game.pieces:
             self.game.pieces.remove(pawn)
-            print(f"🗑️ הסרתי חייל: {pawn.piece_id}")
+            print(f"🗑️ Removed pawn: {pawn.piece_id}")
             
         self.game.pieces.append(new_queen)
-        print(f"👑 הוספתי מלכה חדשה: {queen_id} במיקום {position}")
-        print(f"🎉 הכתרה הושלמה בהצלחה! {pawn.piece_id} -> {queen_id}")
+        print(f"👑 Added new queen: {queen_id} at position {position}")
+        print(f"🎉 Promotion completed successfully! {pawn.piece_id} -> {queen_id}")
