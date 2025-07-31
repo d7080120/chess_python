@@ -1,50 +1,39 @@
 """
-🎮 מדריך מיקום חלונות למשחק השחמט
-=======================================
+🎮 Window Positioning Guide for Chess Game
+==========================================
 
-כדי לשנות את מיקום החלונות במשחק:
+To change window positions in the game:
 
-📝 עריכת קובץ ההגדרות:
-1. פתח את הקובץ: window_settings.py
-2. שנה את הערכים הבאים:
+📝 Edit settings file:
+1. Open the file: window_settings.py
+2. Change the following values:
 
-📍 אפשרויות מיקום:
-   "top-left" = פינה שמאלית עליונה (0, 0)
-   "center"   = מרכז המסך
+📍 Position options:
+   "top-left" = Top-left corner (0, 0)
+   "center"   = Screen center
 
-🔧 דוגמאות:
+🔧 Examples:
 
-לפתיחה בפינה השמאלית העליונה:
+For top-left corner opening:
     PLAYER_DIALOG_POSITION = "top-left"
     GAME_WINDOW_POSITION = "top-left"
 
-לפתיחה במרכז המסך:
+For center screen opening:
     PLAYER_DIALOG_POSITION = "center"
     GAME_WINDOW_POSITION = "center"
 
-לשילוב (דיאלוג בפינה, משחק במרכז):
+For combination (dialog in corner, game in center):
     PLAYER_DIALOG_POSITION = "top-left"
     GAME_WINDOW_POSITION = "center"
 
-💡 עצות:
-- "top-left" טוב למסכים קטנים או כשאתה רוצה לראות חלונות אחרים
-- "center" טוב למסכים גדולים ולמיקוד במשחק
-- השינויים יכנסו לתוקף בהפעלה הבאה של המשחק
+💡 Tips:
+- "top-left" is good for small screens or when you want to see other windows
+- "center" is good for large screens and game focus
+- Changes take effect on next game launch
 
-🚀 הפעלת המשחק:
+🚀 Run the game:
 python main.py
-"""
 
-if __name__ == "__main__":
-    print("📖 להצגת המדריך המלא, קרא את הקובץ window_positioning_guide.py")
-    
-    # הצגת ההגדרות הנוכחיות
-    try:
-        from src.ui.window_settings import PLAYER_DIALOG_POSITION, GAME_WINDOW_POSITION
-        print("\n⚙️ הגדרות נוכחיות:")
-        print(f"   🎯 חלון השמות: {PLAYER_DIALOG_POSITION}")
-        print(f"   🎮 חלון המשחק: {GAME_WINDOW_POSITION}")
-    except ImportError:
-        print("❌ שגיאה בטעינת ההגדרות")
-    
-    print("\n🔧 לשינוי ההגדרות, ערוך את הקובץ: window_settings.py")
+📋 Current Settings:
+Edit the window_settings.py file to customize window positions according to your preferences.
+"""

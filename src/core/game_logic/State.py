@@ -21,7 +21,7 @@ class State:
             "rest_long": {"rest_done": "idle"},
         }
         self.rest_start = None
-        self.rest_time = {"rest_short": 2000, "rest_long": 5000}  # 2 seconds short, 5 seconds long
+        self.rest_time = {"rest_short": 2000, "rest_long": 5000}
         self._last_cmd: Optional[Command] = None
 
     def reset(self, cmd: Command):
@@ -61,20 +61,17 @@ class State:
             old_state = self.state
             self.state = next_state
             
-            # עדכן Graphics עם reset שמכיל את המצב החדש
             state_cmd = Command(timestamp=now_ms, piece_id=None, type="state_change", 
                               params={"target_state": self.state})
             self._graphics.reset(state_cmd)
             
-            # אתחול מנוחה אם צריך
             if self.state in ("rest_short", "rest_long"):
                 self.rest_start = now_ms
-                rest_duration = self.rest_time[self.state] / 1000  # Convert to milliseconds
+                rest_duration = self.rest_time[self.state] / 1000
             elif self.state == "idle":
-                self.rest_start = None  # Reset rest when returning to idle
+                self.rest_start = None
 
     def can_transition(self, now_ms: int) -> bool:
-        # אפשר להרחיב לפי הצורך
         return True
 
     def get_command(self) -> Optional[Command]:
@@ -84,7 +81,6 @@ class State:
         """Process an incoming command and return the next state."""
         # print(f"🔧 State.process_command: processing command {cmd.type} for {cmd.piece_id}")
         
-        # בדיקה אם הכלי במנוחה - דחה פקודות תנועה חדשות
         if self.state in ("rest_short", "rest_long") and cmd.type in ("move", "jump"):
             if self.rest_start is not None:
                 now_ms = cmd.timestamp if hasattr(cmd, 'timestamp') else 0
@@ -93,21 +89,15 @@ class State:
                 
                 if elapsed_ms < required_ms:
                     remaining_sec = (required_ms - elapsed_ms) / 1000
-                    return None  # Return None to indicate rejection
+                    return None
         
-        # Handle movement commands
         if cmd.type == "move":
-            
-            # Reset physics to handle movement with animation
             self._physics.reset(cmd)
             
-            # Immediate transition to move state
             self.state = "move"
             self._last_cmd = cmd
             
         elif cmd.type == "jump":
-            
-            # Reset physics to handle jump
             self._physics.reset(cmd)
             
             self.state = "jump"

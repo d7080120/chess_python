@@ -1,5 +1,5 @@
 """
-DrawManager - מחלקה לציור המשחק, הסמנים, הניקוד וההיסטוריה
+DrawManager - Handles game drawing, cursors, scoring and history display
 """
 import cv2
 import numpy as np
@@ -12,35 +12,29 @@ class DrawManager:
         self.game = game_ref
         self.background_img = None
         
-        # גדלי המסך והלוח
-        self.screen_width = 1200  # רוחב כולל
-        self.screen_height = 800  # גובה כולל
-        self.board_size = 600     # גודל הלוח הפנימי
-        self.board_x = (self.screen_width - self.board_size) // 2  # מרכז אופקי
-        self.board_y = (self.screen_height - self.board_size) // 2  # מרכז אנכי
+        self.screen_width = 1200
+        self.screen_height = 800
+        self.board_size = 600
+        self.board_x = (self.screen_width - self.board_size) // 2
+        self.board_y = (self.screen_height - self.board_size) // 2
         
-        # אזורי הטקסט
         self.left_panel_x = 50
         self.right_panel_x = self.board_x + self.board_size + 50
         self.panel_width = 150
 
     def draw_game(self):
         """Draw the current game state with score and move history."""
-        # צור עותק נקי של הלוח לכל פריים
         display_board = self.game.clone_board()
         
-        # ציור כל הכלים על העותק
         now = self.game.game_time_ms()
         for p in self.game.pieces:
             p.draw_on_board(display_board, now)
         
-        # ציור סמנים של השחקנים
         self._draw_cursors(display_board)
         
-        # יצירת canvas רחב יותר עם רקע לניקוד והיסטוריה
         enhanced_display = self._create_enhanced_display(display_board)
         
-        # הצגה
+        # Display
         if enhanced_display is not None:
             cv2.imshow("Chess Game", enhanced_display)
 
@@ -52,27 +46,27 @@ class DrawManager:
         board_img = board.img.img
         board_height, board_width = board_img.shape[:2]
         
-        # יצירת canvas רחב יותר (לוח + 2 פאנלים בצדדים)
-        panel_width = 300  # רוחב הפאנל בכל צד
+        # Create wider canvas (board + 2 side panels)
+        panel_width = 300
         total_width = board_width + (2 * panel_width)
         
-        # יצירת רקע (נסה לטעון background.png או צור רקע אחיד)
+        # Create background (try to load background.png or create solid background)
         background = self._create_background(total_width, board_height)
         
-        # מיקום הלוח במרכז
+        # Position board in center
         board_x_offset = panel_width
         
-        # המרת צבעים אם נחוץ (RGBA לRGB)
+        # Convert colors if needed (RGBA to RGB)
         if len(board_img.shape) == 3 and board_img.shape[2] == 4:
-            # המרה מ-RGBA ל-RGB
+            # Convert from RGBA to RGB
             board_img = cv2.cvtColor(board_img, cv2.COLOR_RGBA2RGB)
         elif len(board_img.shape) == 3 and board_img.shape[2] == 3:
-            # כבר RGB, אין צורך בהמרה
+            # Already RGB, no conversion needed
             pass
         
         background[0:board_height, board_x_offset:board_x_offset + board_width] = board_img
         
-        # ציור הפאנלים
+        # Draw panels
         self._draw_left_panel(background, 0, panel_width, board_height)  # Player 1 (White)
         self._draw_right_panel(background, board_x_offset + board_width, panel_width, board_height)  # Player 2 (Black)
         
@@ -81,7 +75,7 @@ class DrawManager:
     def _create_background(self, width, height):
         """Create or load background image"""
         try:
-            # נסה לטעון background.png
+            # Try to load background.png
             import pathlib
             bg_path = pathlib.Path(__file__).parent.parent.parent / "assets" / "images" / "background.png"
             if bg_path.exists():
@@ -91,94 +85,94 @@ class DrawManager:
         except:
             pass
         
-        # אם אין רקע, צור רקע כהה אלגנטי
+        # If no background, create elegant dark background
         background = np.zeros((height, width, 3), dtype=np.uint8)
-        background[:] = (40, 40, 40)  # רקע אפור כהה
+        background[:] = (40, 40, 40)
         return background
 
     def _draw_left_panel(self, img, x_start, width, height):
         """Draw left panel for Player 1 (White)"""
-        # קבל שם השחקן
+        # Get player name
         player_name = self.game.player_name_manager.get_player1_name()
         
-        # כותרת עם שם השחקן
-        cv2.rectangle(img, (x_start, 0), (x_start + width, 80), (200, 200, 255), -1)  # רקע כחול בהיר - יותר גבוה
+        # Header with player name
+        cv2.rectangle(img, (x_start, 0), (x_start + width, 80), (200, 200, 255), -1)
         
-        # שם השחקן - גופן מעוצב יותר
+        # Player name - styled font
         cv2.putText(img, player_name, (x_start + 10, 30), 
                    cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 0, 0), 2)
         cv2.putText(img, "(WHITE)", (x_start + 10, 60), 
                    cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 0, 0), 2)
         
-        # ניקוד - גופן מעוצב יותר
+        # Score - styled font
         if hasattr(self.game, 'score_manager'):
             score1, _ = self.game.score_manager.get_scores()
             cv2.putText(img, f"Score: {score1}", (x_start + 10, 110), 
                        cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 0, 0), 2)  # Changed to black
         
-        # היסטוריית מהלכים - כותרת מעוצבת יותר
+        # Move history - styled header
         cv2.putText(img, "Recent Moves:", (x_start + 10, 150), 
                    cv2.FONT_HERSHEY_DUPLEX, 0.7, (200, 200, 200), 2)
         
         if hasattr(self.game, 'score_manager'):
             moves_with_numbers = self.game.score_manager.get_player1_recent_moves_with_numbers(10)
-            # רקע לבן קטן למהלכים (כמו דף נייר)
+            # Small white background for moves (like paper sheet)
             if moves_with_numbers:
                 moves_bg_height = min(len(moves_with_numbers) * 35 + 20, height - 200)
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
-                             (240, 240, 240), -1)  # רקע לבן
+                             (240, 240, 240), -1)  # White background
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
-                             (180, 180, 180), 2)   # גבול אפור
+                             (180, 180, 180), 2)   # Gray border
             
             for i, (move_number, move) in enumerate(moves_with_numbers):
-                y = 195 + (i * 35)  # רווח גדול יותר בין המהלכים
+                y = 195 + (i * 35)  # Larger spacing between moves
                 if y > height - 40:
                     break
-                # מהלכים בגופן מעוצב וברור יותר - מספור אמיתי מתחילת המשחק - שחקן 1
+                # Moves in styled clear font - real numbering from game start - player 1
                 cv2.putText(img, f"{move_number}. {move}", (x_start + 15, y), 
-                           cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)  # טקסט שחור על רקע לבן
+                           cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)  # Black text on white background
 
     def _draw_right_panel(self, img, x_start, width, height):
         """Draw right panel for Player 2 (Black)"""
-        # קבל שם השחקן
+        # Get player name
         player_name = self.game.player_name_manager.get_player2_name()
         
-        # כותרת עם שם השחקן
-        cv2.rectangle(img, (x_start, 0), (x_start + width, 80), (100, 100, 100), -1)  # רקע אפור כהה - יותר גבוה
+        # Header with player name
+        cv2.rectangle(img, (x_start, 0), (x_start + width, 80), (100, 100, 100), -1)
         
-        # שם השחקן - גופן מעוצב יותר
+        # Player name - styled font
         cv2.putText(img, player_name, (x_start + 10, 30), 
                    cv2.FONT_HERSHEY_DUPLEX, 0.9, (255, 255, 255), 2)
         cv2.putText(img, "(BLACK)", (x_start + 10, 60), 
                    cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 255, 255), 2)
         
-        # ניקוד - גופן מעוצב יותר
+        # Score - styled font
         if hasattr(self.game, 'score_manager'):
             _, score2 = self.game.score_manager.get_scores()
             cv2.putText(img, f"Score: {score2}", (x_start + 10, 110), 
                        cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 0, 0), 2)  # Changed to black
         
-        # היסטוריית מהלכים - כותרת מעוצבת יותר
+        # Move history - styled header
         cv2.putText(img, "Recent Moves:", (x_start + 10, 150), 
                    cv2.FONT_HERSHEY_DUPLEX, 0.7, (200, 200, 200), 2)
         
         if hasattr(self.game, 'score_manager'):
             moves_with_numbers = self.game.score_manager.get_player2_recent_moves_with_numbers(10)
-            # רקע לבן קטן למהלכים (כמו דף נייר)
+            # Small white background for moves (like paper sheet)
             if moves_with_numbers:
                 moves_bg_height = min(len(moves_with_numbers) * 35 + 20, height - 200)
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
-                             (240, 240, 240), -1)  # רקע לבן
+                             (240, 240, 240), -1)  # White background
                 cv2.rectangle(img, (x_start + 5, 175), (x_start + width - 5, 175 + moves_bg_height), 
-                             (180, 180, 180), 2)   # גבול אפור
+                             (180, 180, 180), 2)   # Gray border
             
             for i, (move_number, move) in enumerate(moves_with_numbers):
-                y = 195 + (i * 35)  # רווח גדול יותר בין המהלכים
+                y = 195 + (i * 35)  # Larger spacing between moves
                 if y > height - 40:
                     break
-                # מהלכים בגופן מעוצב וברור יותר - מספור אמיתי מתחילת המשחק - שחקן 2
+                # Moves in styled clear font - real numbering from game start - player 2
                 cv2.putText(img, f"{move_number}. {move}", (x_start + 15, y), 
-                           cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)  # טקסט שחור על רקע לבן
+                           cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 0, 0), 2)  # Black text on white background
 
     def _draw_cursors(self, board):
         """Draw player cursors on the board."""

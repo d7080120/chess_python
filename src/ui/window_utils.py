@@ -22,11 +22,11 @@ def get_screen_center_position(window_width, window_height):
         screen_height = root.winfo_screenheight()
         root.destroy()
         
-        # חישוב מיקום מרכזי מושלם
+        # Calculate perfect center position
         center_x = (screen_width - window_width) // 2
         center_y = (screen_height - window_height) // 2
         
-        # וודא שהחלון לא יצא מהמסך
+        # Ensure window doesn't go off screen
         center_x = max(0, center_x)
         center_y = max(0, center_y)
         
@@ -34,7 +34,7 @@ def get_screen_center_position(window_width, window_height):
         
     except Exception as e:
         print(f"⚠️ Could not get screen dimensions: {e}")
-        # ברירת מחדל במירכז משוער
+        # Default approximate center
         return 200, 100
 
 

@@ -1,5 +1,5 @@
 """
-CaptureHandler - מחלקה לטיפול בתפיסות וביטול כלים
+CaptureHandler - Handles piece captures and removal
 """
 import pathlib
 from src.core.game_logic.Command import Command
@@ -23,40 +23,30 @@ class CaptureHandler:
         if not arriving_piece:
             return
         
-        # Get the position of the arriving piece
         target_pos = arriving_piece._state._physics.cell
+        from_pos = target_pos
         
-        # Assume the piece came from a previous position - we'll use current position as source for now
-        from_pos = target_pos  # This is not accurate but will work for now
-        
-        # Check pawn promotion before checking capture
         self._check_pawn_promotion(arriving_piece, target_pos)
         
-        # Search for enemy piece at the same position
         pieces_to_remove = []
         for piece in self.game.pieces:
-            if piece != arriving_piece:  # Not the same piece
+            if piece != arriving_piece:
                 piece_pos = piece._state._physics.cell
                 if piece_pos == target_pos:
-                    # Check if it's an enemy piece
                     arriving_is_white = 'W' in arriving_piece.piece_id
                     piece_is_white = 'W' in piece.piece_id
                     
-                    if arriving_is_white != piece_is_white:  # Different colors = enemies
+                    if arriving_is_white != piece_is_white:
                         pieces_to_remove.append(piece)
                         
-                        # Special check for kings
                         if piece.piece_id in ["KW0", "KB0"]:
                             print(f"KING CAPTURED! {piece.piece_id} was taken!")
         
-        # Remove captured pieces
         for piece in pieces_to_remove:
             if piece in self.game.pieces:
                 self.game.pieces.remove(piece)
                 
-                # Additional victory check for kings
                 if piece.piece_id in ["KW0", "KB0"]:
-                    # Immediate check for victory conditions
                     white_kings = [p for p in self.game.pieces if p.piece_id == "KW0"]
                     black_kings = [p for p in self.game.pieces if p.piece_id == "KB0"]
                     
@@ -69,30 +59,27 @@ class CaptureHandler:
         if pieces_to_remove:
             if self.game.win_checker.is_win():
                 self.game.win_checker.announce_win()
-                self.game.game_over = True  # Mark game as over immediately after victory
+                self.game.game_over = True
         
-        # DEBUG: Print attacking piece position after capture
         final_pos = arriving_piece._state._physics.cell
 
     def _check_pawn_promotion(self, piece, target_pos):
         """Check if a pawn should be promoted to queen."""
-        # Check if it's a pawn
         if not piece.piece_id.startswith('P'):
-            return  # Not a pawn - no promotion
+            return
             
-        col, row = target_pos  # target_pos is (x, y) = (col, row)
+        col, row = target_pos
         is_white_pawn = 'W' in piece.piece_id
         is_black_pawn = 'B' in piece.piece_id
         
-        # Check if the pawn reached the appropriate promotion row
         should_promote = False
         new_piece_type = None
         
-        if is_white_pawn and row == 0:  # White pawn reached row 0
+        if is_white_pawn and row == 0:
             should_promote = True
             new_piece_type = "QW"
             print(f"White pawn promoted to Queen!")
-        elif is_black_pawn and row == 7:  # Black pawn reached row 7
+        elif is_black_pawn and row == 7:
             should_promote = True
             new_piece_type = "QB"
             print(f"Black pawn promoted to Queen!")

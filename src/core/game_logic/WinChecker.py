@@ -1,5 +1,5 @@
 """
-WinChecker - מחלקה לבדיקת תנאי נצחון
+WinChecker - Checks victory conditions
 """
 
 
@@ -10,17 +10,15 @@ class WinChecker:
 
     def is_win(self) -> bool:
         """Check if the game has ended."""
-        # בדיקה אם אחד המלכים נהרג
         white_king_alive = False
         black_king_alive = False
         
         for piece in self.game.pieces:
-            if piece.piece_id == "KW0":  # מלך לבן
+            if piece.piece_id == "KW0":
                 white_king_alive = True
-            elif piece.piece_id == "KB0":  # מלך שחור
+            elif piece.piece_id == "KB0":
                 black_king_alive = True
         
-        # אם אחד המלכים נהרג - המשחק נגמר
         if not white_king_alive or not black_king_alive:
             return True
             
@@ -28,14 +26,13 @@ class WinChecker:
 
     def announce_win(self):
         """Announce the winner."""
-        # בדיקה מי ניצח
         white_king_alive = False
         black_king_alive = False
         
         for piece in self.game.pieces:
-            if piece.piece_id == "KW0":  # מלך לבן
+            if piece.piece_id == "KW0":
                 white_king_alive = True
-            elif piece.piece_id == "KB0":  # מלך שחור
+            elif piece.piece_id == "KB0":
                 black_king_alive = True
         
         if not white_king_alive:

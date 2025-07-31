@@ -1,9 +1,9 @@
 """
-הגדרות מיקום חלונות עבור משחק השחמט
+Window positioning settings for the chess game
 """
 
-# מיקום חלון השמות (דיאלוג הכנסת השמות) - במרכז המסך
+# Player dialog position (name entry dialog) - center of screen
 PLAYER_DIALOG_POSITION = "center"
 
-# מיקום חלון המשחק הראשי - בפינה השמאלית העליונה
+# Main game window position - top-left corner
 GAME_WINDOW_POSITION = "top-left"

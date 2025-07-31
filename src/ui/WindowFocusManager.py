@@ -1,6 +1,6 @@
 """
-WindowFocusManager - מחלקה לניהול פוקוס חלון המשחק ב-Windows
-פותר את הבעיה שהקלט נקלט ב-VSCode במקום במשחק
+WindowFocusManager - Class for managing game window focus on Windows
+Solves the issue where input is captured in VSCode instead of the game
 """
 import cv2
 import sys
@@ -15,7 +15,7 @@ class WindowFocusManager:
     
     def __init__(self, window_name: str = "Chess Game", window_position: str = "center"):
         self.window_name = window_name
-        self.window_position = window_position  # "center" או "top-left"
+        self.window_position = window_position  # "center" or "top-left"
         self.window_handle = None
         self.focus_attempts = 0
         self.max_focus_attempts = 3
@@ -32,18 +32,18 @@ class WindowFocusManager:
     def create_focused_window(self):
         """Create the game window with automatic focus"""
         try:
-            # יצירת החלון
+            # Create the window
             cv2.namedWindow(self.window_name, cv2.WINDOW_AUTOSIZE)
             
-            # הגדרות OpenCV בסיסיות
+            # Basic OpenCV settings
             cv2.setWindowProperty(self.window_name, cv2.WND_PROP_TOPMOST, 1)
             
-            # מיקום החלון לפי הבחירה (גודל משוער של חלון המשחק)
+            # Position window according to choice (estimated game window size)
             game_window_width = 800
             game_window_height = 800
             center_window(self.window_name, game_window_width, game_window_height, self.window_position)
             
-            # נסיון לקבל focus אוטומטי
+            # Attempt to get automatic focus
             self.ensure_focus()
             
             print(f"🖥️ Game window '{self.window_name}' created with focus")
@@ -55,22 +55,22 @@ class WindowFocusManager:
     def ensure_focus(self):
         """Ensure the game window has focus"""
         if not self.windows_api_available:
-            # fallback לשיטות OpenCV בלבד
+            # Fallback to OpenCV methods only
             self._opencv_focus_fallback()
             return
         
         try:
-            # מצא את החלון
+            # Find the window
             if not self.window_handle:
                 self.window_handle = self._find_window()
             
             if self.window_handle:
-                # הבא את החלון לחזית
+                # Bring window to front
                 self.user32.SetForegroundWindow(self.window_handle)
                 self.user32.SetActiveWindow(self.window_handle)
                 self.user32.SetFocus(self.window_handle)
                 
-                # וודא שהחלון גלוי
+                # Ensure window is visible
                 self.user32.ShowWindow(self.window_handle, 9)  # SW_RESTORE
                 self.user32.BringWindowToTop(self.window_handle)
                 
@@ -84,12 +84,12 @@ class WindowFocusManager:
     def _find_window(self):
         """Find the OpenCV window handle"""
         try:
-            # נסיון למצוא את החלון לפי שם
+            # Try to find window by name
             hwnd = self.user32.FindWindowW(None, self.window_name)
             if hwnd:
                 return hwnd
             
-            # נסיון חלופי - חיפוש חלונות OpenCV
+            # Alternative attempt - search OpenCV windows
             def enum_windows_proc(hwnd, lParam):
                 length = self.user32.GetWindowTextLengthW(hwnd)
                 if length > 0:
@@ -97,7 +97,7 @@ class WindowFocusManager:
                     self.user32.GetWindowTextW(hwnd, buff, length + 1)
                     if self.window_name in buff.value:
                         self.window_handle = hwnd
-                        return False  # עצור את החיפוש
+                        return False  # Stop the search
                 return True
             
             enum_windows_proc_type = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
@@ -112,7 +112,7 @@ class WindowFocusManager:
         """Fallback method using only OpenCV"""
         try:
             cv2.setWindowProperty(self.window_name, cv2.WND_PROP_TOPMOST, 1)
-            time.sleep(0.01)  # קצת המתנה
+            time.sleep(0.01)  # Short wait
             cv2.setWindowProperty(self.window_name, cv2.WND_PROP_TOPMOST, 0)
             cv2.setWindowProperty(self.window_name, cv2.WND_PROP_TOPMOST, 1)
         except:

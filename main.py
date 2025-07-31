@@ -1,5 +1,5 @@
 """
-main.py - נקודת הכניסה הראשית למשחק שחמט
+main.py - Main entry point for chess game
 """
 from src.graphics.img import Img
 from src.core.game_logic.Board import Board
@@ -23,7 +23,6 @@ def create_chess_game():
         print("❌ Failed to load board image!")
         return None
 
-    # צור את הלוח
     board = Board(
         cell_W_pix=cell_size,
         cell_H_pix=cell_size,
@@ -34,18 +33,14 @@ def create_chess_game():
         img=img
     )
 
-    # צור מפעל כלים
     pieces_root = pathlib.Path(__file__).parent / "assets" / "pieces"
     factory = PieceFactory(board, pieces_root)
 
-    # יצירת כלים בפריסה סטנדרטית - לפני יצירת המשחק
     start_positions = [
-        # כלים שחורים
         ("RB", (0, 0)), ("NB", (1, 0)), ("BB", (2, 0)), ("QB", (3, 0)), 
         ("KB", (4, 0)), ("BB", (5, 0)), ("NB", (6, 0)), ("RB", (7, 0)),
         ("PB", (0, 1)), ("PB", (1, 1)), ("PB", (2, 1)), ("PB", (3, 1)), 
         ("PB", (4, 1)), ("PB", (5, 1)), ("PB", (6, 1)), ("PB", (7, 1)),
-        # כלים לבנים
         ("PW", (0, 6)), ("PW", (1, 6)), ("PW", (2, 6)), ("PW", (3, 6)), 
         ("PW", (4, 6)), ("PW", (5, 6)), ("PW", (6, 6)), ("PW", (7, 6)),
         ("RW", (0, 7)), ("NW", (1, 7)), ("BW", (2, 7)), ("QW", (3, 7)), 
@@ -57,45 +52,38 @@ def create_chess_game():
 
     for p_type, cell in start_positions:
         try:
-            # Create unique piece ID
             if p_type not in piece_counters:
                 piece_counters[p_type] = 0
             piece_id = f"{p_type}{piece_counters[p_type]}"
             piece_counters[p_type] += 1
 
-            # יצירת הכלי - זקוקים למחכה של המשחק
-            piece = factory.create_piece(p_type, cell, None)  # נעביר None בינתיים
+            piece = factory.create_piece(p_type, cell, None)
             piece.piece_id = piece_id
             if hasattr(piece, '_state') and hasattr(piece._state, '_physics'):
                 piece._state._physics.piece_id = piece_id
             pieces.append(piece)
             
         except FileNotFoundError:
-            pass  # Missing piece image
+            pass
         except Exception as e:
-            pass  # Error creating piece
+            pass
 
-    # קבל שמות שחקנים ראשון - לפני יצירת המשחק הגדול
     from src.ui.PlayerNameManager import PlayerNameManager
     from src.ui.window_settings import PLAYER_DIALOG_POSITION
     
     temp_name_manager = PlayerNameManager()
     temp_name_manager.get_player_names(window_position=PLAYER_DIALOG_POSITION)
     
-    # צור את המשחק אחרי שמות השחקנים
     game = Game(pieces, board)
     
-    # עדכן את הכלים עם התורים של המשחק
     for piece in pieces:
         if hasattr(piece, '_state') and hasattr(piece._state, '_physics'):
             piece._state._physics.user_input_queue = game.user_input_queue
-            piece._state._game_queue = game.game_queue  # 🔧 הוספת game_queue לכלים
+            piece._state._game_queue = game.game_queue
     
-    # העבר את השמות למשחק
     game.player_name_manager.player1_name = temp_name_manager.player1_name
     game.player_name_manager.player2_name = temp_name_manager.player2_name
     
-    # עדכן את המשחק עם הכלים שכבר נוצרו
     game.pieces = pieces
     
     print("\n🎯 Game Controls:")
@@ -113,10 +101,8 @@ def demonstrate_architecture():
 
 if __name__ == "__main__":
     try:
-        # Show architecture benefits
         demonstrate_architecture()
         
-        # Create and run the game
         game = create_chess_game()
         if game:
             game.run()
