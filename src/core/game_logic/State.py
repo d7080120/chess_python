@@ -42,15 +42,8 @@ class State:
         # Handle rest states
         if self.state in ("rest_short", "rest_long"):
             if self.rest_start is not None and now_ms - self.rest_start >= self.rest_time[self.state]:
-                print(f"⏰ DEBUG: Rest completed for {self.state} - transitioning to idle")
-                print(f"   Now: {now_ms}, Rest started: {self.rest_start}, Duration: {self.rest_time[self.state]}ms")
                 self._last_cmd = Command(timestamp=now_ms, piece_id=None, type="rest_done", params=None)
                 self._transition("rest_done", now_ms)
-            else:
-                if self.rest_start is not None:
-                    remaining = self.rest_time[self.state] - (now_ms - self.rest_start)
-                    if remaining > 0:
-                        print(f"💤 DEBUG: Still resting in {self.state}, {remaining}ms remaining")
         else:
             cmd = self._physics.update(now_ms)
             if cmd is not None:
@@ -67,7 +60,6 @@ class State:
         if next_state:
             old_state = self.state
             self.state = next_state
-            print(f"🔄 State transition: {old_state} -> {self.state} (event: {event})")
             
             # עדכן Graphics עם reset שמכיל את המצב החדש
             state_cmd = Command(timestamp=now_ms, piece_id=None, type="state_change", 
@@ -78,10 +70,8 @@ class State:
             if self.state in ("rest_short", "rest_long"):
                 self.rest_start = now_ms
                 rest_duration = self.rest_time[self.state] / 1000  # Convert to milliseconds
-                print(f"💤 Starting rest {self.state} for {rest_duration} seconds")
             elif self.state == "idle":
                 self.rest_start = None  # Reset rest when returning to idle
-                print(f"✅ Returned to idle state - ready for new movement")
 
     def can_transition(self, now_ms: int) -> bool:
         # אפשר להרחיב לפי הצורך
@@ -103,12 +93,10 @@ class State:
                 
                 if elapsed_ms < required_ms:
                     remaining_sec = (required_ms - elapsed_ms) / 1000
-                    print(f"🚫 {cmd.piece_id} resting in {self.state} - {remaining_sec:.1f} seconds remaining - rejecting {cmd.type} command")
                     return None  # Return None to indicate rejection
         
         # Handle movement commands
         if cmd.type == "move":
-            print(f"🎯 State: executing movement to {cmd.target}")
             
             # Reset physics to handle movement with animation
             self._physics.reset(cmd)
@@ -118,7 +106,6 @@ class State:
             self._last_cmd = cmd
             
         elif cmd.type == "jump":
-            print(f"🎯 State: executing jump to {cmd.target}")
             
             # Reset physics to handle jump
             self._physics.reset(cmd)
@@ -128,10 +115,9 @@ class State:
             self._transition("arrived", cmd.timestamp if hasattr(cmd, 'timestamp') else 0)
             
         elif cmd.type == "reset":
-            # print(f"🔧 State: reset to idle state")
             self.reset(cmd)
         
         else:
-            print(f"❓ State: unknown command: {cmd.type}")
+            pass
         
         return self

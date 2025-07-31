@@ -7,8 +7,10 @@ class SoundPlayer:
 
     def play(self, sound_path):
         try:
+            if not os.path.exists(sound_path):
+                return
+                
             sound = pygame.mixer.Sound(sound_path)
             sound.play()
-            print(f"Playing sound: {sound_path}")
         except Exception as e:
-            print(f"Error playing {sound_path}: {e}")
+            pass

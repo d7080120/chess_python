@@ -2,9 +2,9 @@
 """Test pawn movement rules"""
 
 import pathlib
-from src.core.Board import Board
-from src.core.GameRefactored import GameRefactored
-from src.core.PieceFactory import PieceFactory
+from src.core.game_logic.Board import Board
+from src.core.game_setup.Game import Game
+from src.core.game_setup.PieceFactory import PieceFactory
 from src.graphics.img import Img
 
 def test_pawn_rules():
@@ -44,7 +44,7 @@ def test_pawn_rules():
     pieces.append(black_target)
     
     # Create game
-    game = GameRefactored(pieces, board)
+    game = Game(pieces, board)
     
     # Update pieces with game queues
     for piece in pieces:

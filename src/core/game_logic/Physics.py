@@ -69,7 +69,6 @@ class Physics:
                 self.cell = self.target_cell
                 self.pixel_pos = self.board.cell_to_pixel(self.cell)
                 self.moving = False
-                print(f"🏁 Physics: Piece at {self.cell} reached target")
                 return Command(timestamp=now_ms, piece_id=self.piece_id, type="arrived", target=self.cell, params=None)
             else:
                 # תנועה בתהליך - אינטרפולציה חלקה
@@ -88,7 +87,6 @@ class Physics:
                 self.pixel_pos = (int(x), int(y))
         elif self.mode == "jump" and now_ms >= self.end_time:
             # קפיצה הסתיימה - צריך ליצור פקודת arrived
-            print(f"🏁 Physics: Piece jumped to {self.cell}")
             self.mode = "idle"  # סיום הקפיצה
             return Command(timestamp=now_ms, piece_id=self.piece_id, type="arrived", target=self.cell, params=None)
         return None

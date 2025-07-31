@@ -33,11 +33,11 @@ class TestGameRefactoredIntegration:
             'sound_player': Mock(),
         }):
             # Mock the setup_observers function
-            with patch('GameRefactored.setup_observers') as mock_setup:
-                mock_setup.return_value = (Mock(), Mock(), Mock(), Mock())
+            with patch('src.core.game_setup.Game.setup_observers') as mock_setup:
+                mock_setup.return_value = (Mock(), Mock(), Mock(), Mock(), Mock())
                 
-                from src.core.GameRefactored import GameRefactored
-                self.game = GameRefactored(self.mock_pieces, self.mock_board)
+                from src.core.game_setup.Game import Game
+                self.game = Game(self.mock_pieces, self.mock_board)
     
     def test_game_initialization(self):
         """Test that GameRefactored initializes properly with all helper classes"""

@@ -2,7 +2,7 @@
 test_move_fixes.py - בדיקת התיקונים החדשים למהלכים
 """
 
-from src.ui.ScoreManager import ScoreManager
+from src.core.observers.ScoreManager import ScoreManager
 
 def test_move_fixes():
     """בדיקת התיקונים למערכת המהלכים"""

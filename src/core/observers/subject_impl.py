@@ -15,5 +15,7 @@ class CommandSubject(ISubject):
             del self._subscribers[command_type][observer]
 
     def notify(self, command: Command):
-        for callback in self._subscribers.get(command.type, {}).values():
+        subscribers = self._subscribers.get(command.type, {})
+        
+        for observer, callback in subscribers.items():
             callback(command)

@@ -13,13 +13,11 @@ class MoveValidator:
         """Move piece to new position using Command system."""
         # Check if move is valid
         if not self._is_valid_move(piece, new_x, new_y, player_num):
-            print(f"❌ Invalid move for {piece.piece_id} to ({new_x}, {new_y})")
             return
         
         # Current position of the piece
         current_pos = self._get_piece_position(piece)
         if not current_pos:
-            print(f"❌ Cannot find current position of {piece.piece_id}")
             return
         
         current_x, current_y = current_pos
@@ -31,22 +29,17 @@ class MoveValidator:
         final_x, final_y = new_x, new_y
         if blocking_position:
             final_x, final_y = blocking_position
-            print(f"🎯 Updating target due to blocking piece: from ({new_x}, {new_y}) to ({final_x}, {final_y})")
         
         # Check if there's a piece at the final target position
         target_piece = self._get_piece_at_position(final_x, final_y)
         if target_piece:
             # Check if it's an enemy piece (can capture)
             if self._is_player_piece(target_piece, player_num):
-                print(f"❌ Cannot capture piece of same player: {target_piece.piece_id}")
                 return
             else:
-                print(f"⚔️ {piece.piece_id} captures {target_piece.piece_id}!")
-                # Special check for kings - Extended DEBUG!
+                # Special check for kings
                 if target_piece.piece_id in ["KW0", "KB0"]:
-                    print(f"🚨🚨 CRITICAL: KING CAPTURED! {target_piece.piece_id} was taken! 🚨🚨🚨")
-                    print(f"💀 King killed: {target_piece.piece_id}")
-                    print(f"🔥 This should cause immediate game over!")
+                    print(f"KING CAPTURED! {target_piece.piece_id} was taken!")
                     
                 # Don't delete the piece here - this will happen in _handle_arrival when the piece arrives!
         
@@ -56,7 +49,6 @@ class MoveValidator:
         
         # All movement commands are type "move" - ScoreManager will check params for captured piece
         command_type = "move"
-        print(f"🎯 Creating command type: {command_type} (capture: {is_capture})")
         
         # Move logging will be done via Observer pattern after command is successfully executed
         
@@ -72,15 +64,9 @@ class MoveValidator:
         move_cmd.source = current_pos
         if is_capture and captured_piece_id:
             move_cmd.params = [captured_piece_id]
-            print(f"🎯 Added captured piece to params: {captured_piece_id}")
-        else:
-            print(f"🎯 No capture, params remain None")
         
         # Add command to queue - State.process_command will handle state machine
         self.game.user_input_queue.put(move_cmd)
-        
-        print(f"🎯 Player {player_num}: sent {command_type} command for {piece.piece_id} to ({final_x}, {final_y})")
-        print(f"PLAYER {player_num}: Sent {command_type} command for {piece.piece_id} to ({final_x}, {final_y})")
         # No turn switching - each player can move whenever they want
 
     def _check_path(self, start_x, start_y, end_x, end_y, piece_type):
@@ -108,14 +94,12 @@ class MoveValidator:
             # Check if there's a piece at current square
             blocking_piece = self._get_piece_at_position(current_x, current_y)
             if blocking_piece:
-                print(f"🚫 Path blocked! Piece {blocking_piece.piece_id} at position ({current_x}, {current_y})")
                 return (current_x, current_y)  # Return blocking piece position
             
             # Move to next square
             current_x += step_x
             current_y += step_y
         
-        print(f"✅ Path clear from ({start_x}, {start_y}) to ({end_x}, {end_y})")
         return None  # Path is clear
 
     def _is_valid_move(self, piece, new_x, new_y, player_num):
@@ -142,8 +126,6 @@ class MoveValidator:
         # Read data from piece's move file - first check if move is valid
         if hasattr(piece._state, '_moves') and hasattr(piece._state._moves, 'valid_moves'):
             valid_moves = piece._state._moves.valid_moves
-            print(f"🔍 Checking move: {piece.piece_id} from ({current_x},{current_y}) to ({new_x},{new_y}), difference: ({dx},{dy})")
-            print(f"🔍 Possible moves: {valid_moves}")
             
             move_is_valid = False
             
@@ -159,34 +141,27 @@ class MoveValidator:
                     # Special check for pawns: 2-step move only allowed on first move
                     if abs(actual_dy) == 2:  # This is a 2-step move
                         if not self._is_pawn_first_move(piece):
-                            print(f"❌ Pawn 2-step move only allowed on first move")
                             continue  # Skip this move option
                     
                     # 🎯 PAWN SPECIAL RULES: Check move type vs capture situation
                     if move_type == 'capture':
                         # Capture moves (diagonal) - only valid if there's an enemy piece
                         if not is_capture:
-                            print(f"❌ Pawn diagonal move requires capture, but no piece at target")
                             continue
                     elif move_type == 'non_capture' or move_type == '1st':
                         # Forward moves - only valid if no piece at target
                         if is_capture:
-                            print(f"❌ Pawn forward move blocked by piece")
                             continue
                 else:  # All other pieces - use as is
                     actual_dx = move_dx
                     actual_dy = move_dy
                 
-                print(f"🔍 Checking move ({move_dx},{move_dy},{move_type}) -> translated: ({actual_dx},{actual_dy})")
-                
                 # Check if move matches coordinates
                 if dx == actual_dx and dy == actual_dy:
-                    print(f"✅ Move matches! Difference ({dx},{dy}) = coordinates ({actual_dx},{actual_dy}), type: {move_type}")
                     move_is_valid = True
                     break
             
             if not move_is_valid:
-                print(f"❌ No matching move found")
                 return False
             
             # Now, after we know the move is valid according to files, check path
@@ -194,13 +169,10 @@ class MoveValidator:
             
             # If there's a blocking piece in the way and we're not trying to move to its position
             if blocking_position and blocking_position != (new_x, new_y):
-                print(f"🚫 Invalid move: path blocked by piece at position {blocking_position}")
                 return False
             
-            print(f"✅ Valid move!")
             return True
         else:
-            print(f"❌ No move data for piece {piece.piece_id}")
             return False
 
     def _get_piece_position(self, piece):

@@ -57,42 +57,29 @@ class ScoreManager(IObserver):
     def record_move(self, piece_id: str, from_pos: Tuple[int, int], to_pos: Tuple[int, int], 
                    move_type: str = "move", captured_piece: str = None):
         """Record a move for the appropriate player"""
-        print(f"📝 Recording move: {piece_id} from {from_pos} to {to_pos}, type: {move_type}, captured: {captured_piece}")
-        
         move = MoveRecord(piece_id, from_pos, to_pos, move_type, captured_piece)
         
         # Determine which player made the move
         is_white_piece = 'W' in piece_id
         if is_white_piece:
             self.player1_moves.append(move)
-            print(f"📝 Added move to player 1 history. Total moves: {len(self.player1_moves)}")
-            # Keep full history - no limit
         else:
             self.player2_moves.append(move)
-            print(f"📝 Added move to player 2 history. Total moves: {len(self.player2_moves)}")
-            # Keep full history - no limit
         
         # Update score if there's a captured piece (regardless of move_type)
         if captured_piece:
-            print(f"🏆 Processing capture for scoring...")
             self._update_score_for_capture(is_white_piece, captured_piece)
     
     def _update_score_for_capture(self, capturing_player_is_white: bool, captured_piece_id: str):
         """Update score when a piece is captured"""
-        print(f"🏆 Updating score for capture: white_capturing={capturing_player_is_white}, captured={captured_piece_id}")
-        
         # Extract piece type (first character - P, N, B, R, Q, K)
         piece_type = captured_piece_id[0] if len(captured_piece_id) > 0 else 'P'
         piece_value = self.piece_values.get(piece_type, 0)
         
-        print(f"🏆 Piece type: {piece_type}, value: {piece_value}")
-        
         if capturing_player_is_white:
             self.player1_score += piece_value
-            print(f"🏆 Player 1 (White) scored {piece_value} points! Total: {self.player1_score}")
         else:
             self.player2_score += piece_value
-            print(f"🏆 Player 2 (Black) scored {piece_value} points! Total: {self.player2_score}")
     
     def get_player1_recent_moves(self, count: int = 10) -> List[str]:
         """Get recent moves for player 1 (white) as display strings - newest first"""
@@ -150,21 +137,20 @@ class ScoreManager(IObserver):
         self.player2_score = 0
         self.player1_moves.clear()
         self.player2_moves.clear()
-        print("🔄 Scores and move history reset!")
     
     def print_summary(self):
         """Print current game summary"""
         print("\n" + "="*50)
         print("📊 GAME SUMMARY")
         print("="*50)
-        print(f"🏆 Player 1 (White): {self.player1_score} points | {len(self.player1_moves)} moves")
-        print(f"🏆 Player 2 (Black): {self.player2_score} points | {len(self.player2_moves)} moves")
+        print(f"Player 1 (White): {self.player1_score} points | {len(self.player1_moves)} moves")
+        print(f"Player 2 (Black): {self.player2_score} points | {len(self.player2_moves)} moves")
         
-        print(f"\n📝 Recent moves Player 1:")
+        print(f"\nRecent moves Player 1:")
         for i, move in enumerate(self.get_player1_recent_moves(5), 1):
             print(f"   {i}. {move}")
             
-        print(f"\n📝 Recent moves Player 2:")
+        print(f"\nRecent moves Player 2:")
         for i, move in enumerate(self.get_player2_recent_moves(5), 1):
             print(f"   {i}. {move}")
         print("="*50)

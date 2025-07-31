@@ -182,9 +182,7 @@ class DrawManager:
 
     def _draw_cursors(self, board):
         """Draw player cursors on the board."""
-        print(f"Drawing cursors - Player1: {self.game.player_manager.cursor_pos_player1}, Player2: {self.game.player_manager.cursor_pos_player2}")
         if hasattr(board, 'img') and hasattr(board.img, 'img'):
-            print("Board has img!")
             img = board.img.img
             
             # חישוב גודל משבצת
@@ -197,14 +195,12 @@ class DrawManager:
             top_left_1 = (x1 * cell_width, y1 * cell_height)
             bottom_right_1 = ((x1 + 1) * cell_width - 1, (y1 + 1) * cell_height - 1)
             cv2.rectangle(img, top_left_1, bottom_right_1, (255, 0, 0), 8)  # כחול BGR עבה מאוד
-            print(f"Drew THICK blue cursor at {top_left_1}-{bottom_right_1}")
             
             # ציור סמן שחקן 2 (אדום דק יותר - מסגרת חיצונית, יופיע מעל שחקן 1)
             x2, y2 = self.game.player_manager.cursor_pos_player2
             top_left_2 = (x2 * cell_width, y2 * cell_height)
             bottom_right_2 = ((x2 + 1) * cell_width - 1, (y2 + 1) * cell_height - 1)
             cv2.rectangle(img, top_left_2, bottom_right_2, (0, 0, 255), 5)  # אדום BGR דק יותר, יצויר מעל הכחול
-            print(f"Drew thinner red cursor at {top_left_2}-{bottom_right_2}")
             
             # סימון כלי נבחר - צריך להיות על הכלי עצמו, לא על הסמן
             if self.game.player_manager.selected_piece_player1:
@@ -215,7 +211,6 @@ class DrawManager:
                     piece_top_left = (px * cell_width, py * cell_height)
                     piece_bottom_right = ((px + 1) * cell_width - 1, (py + 1) * cell_height - 1)
                     cv2.rectangle(img, piece_top_left, piece_bottom_right, (0, 255, 0), 4)  # ירוק עבה
-                    print(f"Added green selection for player 1 at piece position {piece_pos}")
             
             if self.game.player_manager.selected_piece_player2:
                 # מצא את מיקום הכלי הנבחר של שחקן 2
@@ -225,9 +220,6 @@ class DrawManager:
                     piece_top_left = (px * cell_width, py * cell_height)
                     piece_bottom_right = ((px + 1) * cell_width - 1, (py + 1) * cell_height - 1)
                     cv2.rectangle(img, piece_top_left, piece_bottom_right, (0, 255, 255), 4)  # צהוב עבה
-                    print(f"Added yellow selection for player 2 at piece position {piece_pos}")
-        else:
-            print("No board img found for cursor drawing!")
 
     def _get_piece_position(self, piece):
         """Get the current position of a piece."""

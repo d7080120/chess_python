@@ -13,6 +13,8 @@ def setup_observers(game_ref=None):
     sound_player = SoundPlayer()  # ← כאן השינוי
     sound = SoundEffectObserver(sound_player)
     
+    print(f"DEBUG: Sound system initialized - SoundPlayer: {type(sound_player)}, SoundEffectObserver: {type(sound)}")
+    
     # יצירת ScoreManager כobserver
     if game_ref:
         score_manager = ScoreManager(game_ref)
@@ -27,5 +29,7 @@ def setup_observers(game_ref=None):
         subject.subscribe(event, sound)
         subject.subscribe(event, score_manager)  # ScoreManager מאזין לכל המהלכים
     subject.subscribe("capture", scorer)
+    
+    print(f"DEBUG: Observers registered for sound system - Events: move, jump, capture, reset, idle")
 
     return subject, logger, scorer, sound_player, score_manager

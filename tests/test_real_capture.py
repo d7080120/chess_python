@@ -2,16 +2,8 @@
 test_real_capture.py - בדיקת תפיסה אמיתית במשחק
 """
 import sys
-im        # נסה לזוז לתפוס
-        capture_cmd = Command(
-            timestamp=int(time.time() * 1000),
-            piece_id="NW",
-            type="move",
-            from_pos=(2, 7),
-            to_pos=(1, 1),  # מיקום הרגלי השחור
-            captured_piece="PB",
-            target=(1, 1)
-        )ib
+import time
+import pathlib
 from unittest.mock import Mock
 
 # הוסף את הנתיב לתיקיית המחלקות
@@ -24,9 +16,9 @@ def test_real_game_capture():
     print("🎮 בדיקת תפיסת כלים במשחק האמיתי")
     print("=" * 50)
     
-    from src.core.GameRefactored import GameRefactored
-    from src.core.Board import Board
-    from src.core.PieceFactory import PieceFactory
+    from src.core.game_setup.Game import Game
+    from src.core.game_logic.Board import Board
+    from src.core.game_setup.PieceFactory import PieceFactory
     from src.graphics.img import Img
     
     try:
@@ -66,7 +58,7 @@ def test_real_game_capture():
             factory.create_piece("NW", (2, 7)),   # סוס לבן
         ]
         
-        game = GameRefactored(pieces, board)
+        game = Game(pieces, board)
         
         print("✅ משחק נוצר בהצלחה")
         print(f"✅ ScoreManager: {type(game.score_manager).__name__}")
@@ -77,7 +69,7 @@ def test_real_game_capture():
         print("   נסה להזיז את הסוס הלבן לתפוס את הרגלי השחור")
         
         # סימולציה של תנועה לתפיסה
-        from src.core.Command import Command
+        from src.core.game_logic.Command import Command
         import time
         
         # נסה לזוז לתפוس

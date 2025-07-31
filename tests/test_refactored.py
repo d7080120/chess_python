@@ -8,9 +8,9 @@ import pathlib
 current_dir = pathlib.Path(__file__).parent
 sys.path.append(str(current_dir))
 
-from src.core.GameRefactored import GameRefactored
-from src.core.Board import Board
-from src.core.PieceFactory import PieceFactory
+from src.core.game_setup.Game import Game
+from src.core.game_logic.Board import Board
+from src.core.game_setup.PieceFactory import PieceFactory
 
 
 def test_refactored_game():
@@ -38,7 +38,7 @@ def test_refactored_game():
         print("✅ מלכים נוצרו בהצלחה")
         
         # צור משחק מחודש
-        game = GameRefactored(pieces, board)
+        game = Game(pieces, board)
         print("✅ משחק מחודש נוצר בהצלחה")
         
         # בדוק שכל המחלקות המסייעות קיימות

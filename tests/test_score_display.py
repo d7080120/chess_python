@@ -13,7 +13,7 @@ def test_score_manager():
     """Test ScoreManager functionality"""
     print("🧪 בודק את ScoreManager...")
     
-    from src.ui.ScoreManager import ScoreManager
+    from src.core.observers.ScoreManager import ScoreManager
     
     # צור mock game
     mock_game = Mock()

@@ -15,9 +15,9 @@ def test_real_game_capture():
     print("🎮 בדיקת תפיסת כלים במשחק האמיתי")
     print("=" * 50)
     
-    from src.core.GameRefactored import GameRefactored
-    from src.core.Board import Board
-    from src.core.PieceFactory import PieceFactory
+    from src.core.game_setup.Game import Game
+    from src.core.game_logic.Board import Board
+    from src.core.game_setup.PieceFactory import PieceFactory
     from src.graphics.img import Img
     
     try:
@@ -57,7 +57,7 @@ def test_real_game_capture():
             factory.create_piece("NW", (2, 7)),   # סוס לבן
         ]
         
-        game = GameRefactored(pieces, board)
+        game = Game(pieces, board)
         
         print("✅ משחק נוצר בהצלחה")
         print(f"✅ ScoreManager: {type(game.score_manager).__name__}")
@@ -68,7 +68,7 @@ def test_real_game_capture():
         print("   נסה להזיז את הסוס הלבן לתפוס את הרגלי השחור")
         
         # סימולציה של תנועה לתפיסה
-        from src.core.Command import Command
+        from src.core.game_logic.Command import Command
         import time
         
         # נסה לזוז לתפוס

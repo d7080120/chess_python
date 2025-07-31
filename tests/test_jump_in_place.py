@@ -6,10 +6,10 @@
 
 import time
 import pathlib
-from src.core.Board import Board
-from src.core.GameRefactored import GameRefactored as Game
-from src.core.PieceFactory import PieceFactory
-from src.core.Command import Command
+from src.core.game_logic.Board import Board
+from src.core.game_setup.Game import Game
+from src.core.game_setup.PieceFactory import PieceFactory
+from src.core.game_logic.Command import Command
 from src.graphics.img import Img
 
 def test_jump_in_place():

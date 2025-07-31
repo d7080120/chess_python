@@ -63,19 +63,14 @@ class Img:
 
     def draw_on(self, other_img, x, y):
         if self.img is None:
-            print("self.img is None")
             return
         if other_img.img is None:
-            print("other_img.img is None")
             return
         if not hasattr(self.img, "shape"):
-            print("self.img has no shape")
             return
         if not hasattr(other_img.img, "shape"):
-            print("other_img.img has no shape")
             return
         if self.img.shape[2] != other_img.img.shape[2]:
-            print("Shape mismatch:", self.img.shape, other_img.img.shape)
             return
 
         h, w = self.img.shape[:2]

@@ -133,8 +133,12 @@ class Game:
         
         for piece in self.pieces:
             if piece.piece_id == cmd.piece_id:
+                print(f"🎵 DEBUG: Processing command {cmd.type} for piece {piece.piece_id}")
                 if piece.on_command(cmd, self.game_time_ms()):
+                    print(f"🎵 DEBUG: Notifying observers for {cmd.type}")
                     self.command_subject.notify(cmd)
+                else:
+                    print(f"🎵 DEBUG: piece.on_command returned False for {cmd.type}")
 
                 # Check win condition after each move
                 if self.win_checker.is_win():

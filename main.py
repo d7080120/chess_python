@@ -10,18 +10,9 @@ import cv2
 
 def create_chess_game():
     """Create and configure a chess game with the new architecture."""
-    print("🎮 Starting chess game with refactored architecture...")
-    print("📋 Components:")
-    print("   📁 InputHandler - handles keyboard input")
-    print("   👥 PlayerManager - manages both players")
-    print("   🎨 DrawManager - draws the game")
-    print("   ⚔️ CaptureHandler - handles captures")
-    print("   🏆 WinChecker - checks victory conditions")
-    print("   🔍 MoveValidator - validates moves")
-    print("   🎮 Game - general manager\n")
+    print("🎮 Starting Chess Game...")
 
     # Load the image
-    print("📸 Loading board image...")
     img = Img()
     img_path = pathlib.Path(__file__).parent / "assets" / "images" / "board.png"
     board_pix_size = 800
@@ -33,7 +24,6 @@ def create_chess_game():
         return None
 
     # צור את הלוח
-    print("🏁 Creating board...")
     board = Board(
         cell_W_pix=cell_size,
         cell_H_pix=cell_size,
@@ -45,12 +35,10 @@ def create_chess_game():
     )
 
     # צור מפעל כלים
-    print("🏭 Creating piece factory...")
     pieces_root = pathlib.Path(__file__).parent / "assets" / "pieces"
     factory = PieceFactory(board, pieces_root)
 
     # יצירת כלים בפריסה סטנדרטית - לפני יצירת המשחק
-    print("♟️ Creating chess pieces...")
     start_positions = [
         # כלים שחורים
         ("RB", (0, 0)), ("NB", (1, 0)), ("BB", (2, 0)), ("QB", (3, 0)), 
@@ -83,12 +71,11 @@ def create_chess_game():
             pieces.append(piece)
             
         except FileNotFoundError:
-            print(f"⚠️ Missing piece image for {p_type}, skipping...")
+            pass  # Missing piece image
         except Exception as e:
-            print(f"❌ Error creating piece {p_type}: {e}")
+            pass  # Error creating piece
 
     # קבל שמות שחקנים ראשון - לפני יצירת המשחק הגדול
-    print("👥 Getting player names first...")
     from src.ui.PlayerNameManager import PlayerNameManager
     from src.ui.window_settings import PLAYER_DIALOG_POSITION
     
@@ -96,7 +83,6 @@ def create_chess_game():
     temp_name_manager.get_player_names(window_position=PLAYER_DIALOG_POSITION)
     
     # צור את המשחק אחרי שמות השחקנים
-    print("🎮 Initializing Game...")
     game = Game(pieces, board)
     
     # עדכן את הכלים עם התורים של המשחק
@@ -112,30 +98,17 @@ def create_chess_game():
     # עדכן את המשחק עם הכלים שכבר נוצרו
     game.pieces = pieces
     
-    print(f"✅ Created {len(pieces)} pieces successfully!")
     print("\n🎯 Game Controls:")
-    print("   Player 1 (White pieces): Numeric keys (8=up, 2=down, 4=left, 6=right, 5/0/Enter=select)")
-    print("   Player 2 (Black pieces): WASD keys (W=up, S=down, A=left, D=right, Space=select)")
-    print("   ESC or Q: Exit game")
-    print("\n🚀 Starting game...")
+    print("   Player 1 (White): 8=up, 2=down, 4=left, 6=right, 5/0/Enter=select")
+    print("   Player 2 (Black): W=up, S=down, A=left, D=right, Space=select")
+    print("   ESC or Q: Exit game\n")
     
     return game
 
 
 def demonstrate_architecture():
     """Demonstrate the benefits of the new architecture."""
-    print("\n🏗️ New Architecture Benefits:")
-    print("✅ Separation of Concerns - each class has one responsibility")
-    print("✅ Maintainability - easier to modify and extend")
-    print("✅ Testability - each component can be tested independently")
-    print("✅ Readability - code is more organized and understandable")
-    print("✅ Reusability - components can be reused in other contexts")
-    print("✅ Debugging - easier to isolate and fix issues")
-    
-    print("\n📊 Code Organization:")
-    print("   Old: 868 lines in single Game.py file")
-    print("   New: Distributed across 7 focused classes")
-    print("   Result: Better maintainability and understanding")
+    pass
 
 
 if __name__ == "__main__":
